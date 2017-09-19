@@ -1,6 +1,8 @@
 # Meta targets
-.PHONY: clean test runtest
+.PHONY: all clean test runtest
 .SILENT:
+
+all: test
 
 # Location to store coverage file
 COVERAGE_FILE=../src/coverage.gcov
@@ -24,13 +26,14 @@ GNATMAKEFLAGS+=-F # Use full pathnames (simplifies vim :make)
 GNATMAKEFLAGS+=-gnatU # Tag errors with "error:"
 GNATMAKEFLAGS+=-gnatVa # Enable validity checking
 GNATMAKEFLAGS+=-gnatef # Use full pathnames in errors too
-GNATMAKEFLAGS+=-gnaty4aAbcdefhiklL12mM80noprSstux # Mandate style guide
+GNATMAKEFLAGS+=-gnatwe # Warnings are errors
+GNATMAKEFLAGS+=-gnaty4aAbCdefhiklL12mM80noprStux # Mandate style guide
 # Style flags are:
 # 4 - Proper indentation with tabs set at 4 spaces
 # a - Proper attribute casing
 # A - Clear array attributes (no index on 1D, full index on nD)
 # b - No blanks at the end of statements
-# c - Comments don't suck
+# C - Comments don't suck (and need 1 space)
 # d - No DOS EOLs
 # e - Ends/Exits must have labels
 # f - No form feeds or vtabs
@@ -46,7 +49,7 @@ GNATMAKEFLAGS+=-gnaty4aAbcdefhiklL12mM80noprSstux # Mandate style guide
 # p - Proper pragma casing
 # r - Identifiers must stay the same case
 # S - No statements on the same line as then or else
-# s - Everything has a spec
+# -s - Everything has a spec (currently omitted)
 # t - Super picky token spacing
 # u - No unnecessary blank lines
 # x - No extra parenthesis (especially if (x) style)
@@ -66,6 +69,7 @@ GNATOPTS=$(GNATLINK) $(GNATBIND) $(GNATMAKEFLAGS)
 TEST_SRC=test/main.adb
 TEST_EXE=../bin/test.out
 test : $(TEST_EXE)
+test : GNATMAKEFLAGS+=-g
 
 $(TEST_EXE) : $(COBJECTS) force_make
 	$(GNATMAKE) $(TEST_SRC) -D. $(INCLUDE_DIRS) -o $@ $(GNATMAKEFLAGS)
