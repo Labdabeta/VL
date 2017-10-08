@@ -4,6 +4,7 @@ with Test_Suites; use Test_Suites;
 with Test_Board;
 with Test_Coordinate;
 with Test_Tile;
+with Test_Action;
 
 procedure Main is
     Separator : String (1 .. 80) := (others => '~');
@@ -11,7 +12,8 @@ procedure Main is
     Suites : Test_Suites.Test_Suites := (
         1 => Test_Board.Suite'Access,
         2 => Test_Coordinate.Suite'Access,
-        3 => Test_Tile.Suite'Access
+        3 => Test_Tile.Suite'Access,
+        4 => Test_Action.Suite'Access
         );
 
     Success : Boolean := True;
@@ -21,6 +23,7 @@ procedure Main is
             when 1 => return "Board";
             when 2 => return "Coordinate";
             when 3 => return "Tile";
+            when 4 => return "Action";
             when others => return "ERROR!!!";
         end case;
     end Suite_Names;

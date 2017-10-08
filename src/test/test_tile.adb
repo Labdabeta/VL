@@ -27,8 +27,28 @@ package body Test_Tile is
     end Check_Tile_Event;
 
     procedure Test_All is
+        Test_Tiles : array (Occupant) of Tile := (
+            VAMPIRE => ((VAMPIRE, 1), FLOOR),
+            LEPRECHAUN => ((LEPRECHAUN, 1), FLOOR),
+            HUMAN => ((HUMAN, 1), FLOOR),
+            FAIRY => ((FAIRY, 1), FLOOR),
+            ZOMBIE => ((ZOMBIE, 1), FLOOR),
+            NONE => ((NONE, 1), FLOOR),
+            UNKNOWN => ((UNKNOWN, 1), FLOOR));
+        All_Attackers : Presence_Array := (
+            1 => (VAMPIRE, 1),
+            2 => (LEPRECHAUN, 2),
+            3 => (HUMAN, 3),
+            4 => (FAIRY, 4),
+            5 => (ZOMBIE, 5));
     begin
-        null;
+        for The_Occupant in Test_Tiles'Range loop
+            Check_Tile_Event (
+                Input => Test_Tiles (The_Occupant),
+                Attackers => All_Attackers,
+                Create => False,
+                Expected => ((NONE, 0), FLOOR));
+        end loop;
     end Test_All;
 
     procedure Test_Basic is
@@ -44,7 +64,7 @@ package body Test_Tile is
         No_Attackers : Presence_Array (1 .. 0);
         Fairy_Attacker : Presence_Array := (1 => (FAIRY, 1));
         Human_Attacker : Presence_Array := (1 => (HUMAN, 1));
-        Empty_Result_Tile : Tile := ((NONE, 1), FLOOR);
+        Empty_Result_Tile : Tile := ((NONE, 0), FLOOR);
         Fairy_Result_Tile : Tile := ((FAIRY, 1), FLOOR);
         Human_Result_Tile : Tile := ((HUMAN, 1), FLOOR);
     begin
@@ -54,16 +74,6 @@ package body Test_Tile is
     end Test_Create;
 
     procedure Test_Doubles is
-    begin
-        null;
-    end Test_Doubles;
-
-    procedure Test_Quads is
-    begin
-        null;
-    end Test_Quads;
-
-    procedure Test_Singles is
         Test_Tiles : array (Occupant) of Tile := (
             VAMPIRE => ((VAMPIRE, 1), FLOOR),
             LEPRECHAUN => ((LEPRECHAUN, 1), FLOOR),
@@ -145,6 +155,63 @@ package body Test_Tile is
                 Create => False,
                 Expected => Zombie_Result_Tiles (The_Occupant));
         end loop;
+    end Test_Doubles;
+
+    procedure Test_Quads is
+        Not_Vampire_Attacker : Presence_Array := (
+            1 => (LEPRECHAUN, 1),
+            2 => (HUMAN, 2),
+            3 => (FAIRY, 3),
+            4 => (ZOMBIE, 4));
+        Not_Leprechaun_Attacker : Presence_Array := (
+            1 => (VAMPIRE, 1),
+            2 => (HUMAN, 2),
+            3 => (FAIRY, 3),
+            4 => (ZOMBIE, 4));
+        Not_Human_Attacker : Presence_Array := (
+            1 => (VAMPIRE, 1),
+            2 => (LEPRECHAUN, 2),
+            3 => (FAIRY, 3),
+            4 => (ZOMBIE, 4));
+        Not_Fairy_Attacker : Presence_Array := (
+            1 => (VAMPIRE, 1),
+            2 => (LEPRECHAUN, 2),
+            3 => (HUMAN, 3),
+            4 => (ZOMBIE, 4));
+        Not_Zombie_Attacker : Presence_Array := (
+            1 => (VAMPIRE, 1),
+            2 => (LEPRECHAUN, 2),
+            3 => (HUMAN, 3),
+            4 => (FAIRY, 4));
+        Empty_Tile : Tile := ((NONE, 0), FLOOR);
+    begin
+        Check_Tile_Event (Empty_Tile, Not_Vampire_Attacker, False, Empty_Tile);
+        Check_Tile_Event (Empty_Tile, Not_Leprechaun_Attacker, False,
+            Empty_Tile);
+        Check_Tile_Event (Empty_Tile, Not_Human_Attacker, False, Empty_Tile);
+        Check_Tile_Event (Empty_Tile, Not_Fairy_Attacker, False, Empty_Tile);
+        Check_Tile_Event (Empty_Tile, Not_Zombie_Attacker, False, Empty_Tile);
+    end Test_Quads;
+
+    procedure Test_Singles is
+        Empty_Tile : Tile := ((NONE, 0), FLOOR);
+        Vampire_Attacker : Presence_Array := (1 => (VAMPIRE, 1));
+        Vampire_Tile : Tile := ((VAMPIRE, 1), FLOOR);
+        Leprechaun_Attacker : Presence_Array := (1 => (LEPRECHAUN, 1));
+        Leprechaun_Tile : Tile := ((LEPRECHAUN, 1), FLOOR);
+        Human_Attacker : Presence_Array := (1 => (HUMAN, 1));
+        Human_Tile : Tile := ((HUMAN, 1), FLOOR);
+        Fairy_Attacker : Presence_Array := (1 => (FAIRY, 1));
+        Fairy_Tile : Tile := ((FAIRY, 1), FLOOR);
+        Zombie_Attacker : Presence_Array := (1 => (ZOMBIE, 1));
+        Zombie_Tile : Tile := ((ZOMBIE, 1), FLOOR);
+    begin
+        Check_Tile_Event (Empty_Tile, Vampire_Attacker, False, Vampire_Tile);
+        Check_Tile_Event (Empty_Tile, Leprechaun_Attacker, False,
+            Leprechaun_Tile);
+        Check_Tile_Event (Empty_Tile, Human_Attacker, False, Human_Tile);
+        Check_Tile_Event (Empty_Tile, Fairy_Attacker, False, Fairy_Tile);
+        Check_Tile_Event (Empty_Tile, Zombie_Attacker, False, Zombie_Tile);
     end Test_Singles;
 
     procedure Test_Stress is
@@ -153,13 +220,145 @@ package body Test_Tile is
     end Test_Stress;
 
     procedure Test_Triples is
+        Test_Tiles : array (Unit) of Tile := (
+            VAMPIRE => ((VAMPIRE, 1), FLOOR),
+            LEPRECHAUN => ((LEPRECHAUN, 1), FLOOR),
+            HUMAN => ((HUMAN, 1), FLOOR),
+            FAIRY => ((FAIRY, 1), FLOOR),
+            ZOMBIE => ((ZOMBIE, 1), FLOOR));
+        Attack_Vectors : array (1 .. 10) of Presence_Array (1 .. 2) := (
+            1 => (1 => (VAMPIRE, 2), 2 => (LEPRECHAUN, 3)),
+            2 => (1 => (VAMPIRE, 2), 2 => (HUMAN, 3)),
+            3 => (1 => (VAMPIRE, 2), 2 => (FAIRY, 3)),
+            4 => (1 => (VAMPIRE, 2), 2 => (ZOMBIE, 3)),
+            5 => (1 => (LEPRECHAUN, 2), 2 => (HUMAN, 3)),
+            6 => (1 => (LEPRECHAUN, 2), 2 => (FAIRY, 3)),
+            7 => (1 => (LEPRECHAUN, 2), 2 => (ZOMBIE, 3)),
+            8 => (1 => (HUMAN, 2), 2 => (FAIRY, 3)),
+            9 => (1 => (HUMAN, 2), 2 => (ZOMBIE, 3)),
+            10 => (1 => (FAIRY, 2), 2 => (ZOMBIE, 3)));
+        Result_Vectors : array (Unit, 1 .. 10) of Tile := (
+            VAMPIRE => (
+                1 => ((LEPRECHAUN, 3), FLOOR),
+                2 => ((NONE, 0), FLOOR),
+                3 => ((FAIRY, 3), FLOOR),
+                4 => ((NONE, 0), FLOOR),
+                5 => ((NONE, 0), FLOOR),
+                6 => ((FAIRY, 3), FLOOR),
+                7 => ((LEPRECHAUN, 2), FLOOR),
+                8 => ((NONE, 0), FLOOR),
+                9 => ((VAMPIRE, 1), FLOOR),
+                10 => ((NONE, 0), FLOOR)),
+            LEPRECHAUN => (
+                1 => ((NONE, 0), FLOOR),
+                2 => ((NONE, 0), FLOOR),
+                3 => ((FAIRY, 3), FLOOR),
+                4 => ((LEPRECHAUN, 1), FLOOR),
+                5 => ((HUMAN, 3), FLOOR),
+                6 => ((FAIRY, 3), FLOOR),
+                7 => ((NONE, 0), FLOOR),
+                8 => ((HUMAN, 2), FLOOR),
+                9 => ((NONE, 0), FLOOR),
+                10 => ((NONE, 0), FLOOR)),
+            HUMAN => (
+                1 => ((NONE, 0), FLOOR),
+                2 => ((VAMPIRE, 2), FLOOR),
+                3 => ((NONE, 0), FLOOR),
+                4 => ((VAMPIRE, 2), FLOOR),
+                5 => ((NONE, 0), FLOOR),
+                6 => ((HUMAN, 1), FLOOR),
+                7 => ((NONE, 0), FLOOR),
+                8 => ((NONE, 0), FLOOR),
+                9 => ((ZOMBIE, 3), FLOOR),
+                10 => ((ZOMBIE, 3), FLOOR)),
+            FAIRY => (
+                1 => ((FAIRY, 1), FLOOR),
+                2 => ((NONE, 0), FLOOR),
+                3 => ((NONE, 0), FLOOR),
+                4 => ((NONE, 0), FLOOR),
+                5 => ((HUMAN, 3), FLOOR),
+                6 => ((NONE, 0), FLOOR),
+                7 => ((NONE, 0), FLOOR),
+                8 => ((HUMAN, 2), FLOOR),
+                9 => ((ZOMBIE, 3), FLOOR),
+                10 => ((ZOMBIE, 3), FLOOR)),
+            ZOMBIE => (
+                1 => ((LEPRECHAUN, 3), FLOOR),
+                2 => ((VAMPIRE, 2), FLOOR),
+                3 => ((NONE, 0), FLOOR),
+                4 => ((VAMPIRE, 2), FLOOR),
+                5 => ((NONE, 0), FLOOR),
+                6 => ((NONE, 0), FLOOR),
+                7 => ((LEPRECHAUN, 2), FLOOR),
+                8 => ((ZOMBIE, 1), FLOOR),
+                9 => ((NONE, 0), FLOOR),
+                10 => ((NONE, 0), FLOOR)));
     begin
-        null;
+        for Defender in Test_Tiles'Range loop
+            for Attackers in Attack_Vectors'Range loop
+                Check_Tile_Event (
+                    Input => Test_Tiles (Defender),
+                    Attackers => Attack_Vectors (Attackers),
+                    Create => False,
+                    Expected => Result_Vectors (Defender, Attackers));
+            end loop;
+        end loop;
     end Test_Triples;
 
     procedure Test_Unusual_Tiles is
+        Test_Tiles : array (Tile_Kind) of Tile := (
+            BASE => ((NONE, 0), BASE),
+            PIT => ((NONE, 0), PIT),
+            FLOOR => ((NONE, 0), FLOOR),
+            PRODUCER => ((NONE, 0), PRODUCER),
+            IMPASSABLE => ((NONE, 0), IMPASSABLE),
+            UNKNOWN => ((NONE, 0), UNKNOWN));
+        Ground_Attackers : Presence_Array := (
+            1 => (VAMPIRE, 1),
+            2 => (HUMAN, 2));
+        Both_Attackers : Presence_Array := (
+            1 => (FAIRY, 1),
+            2 => (HUMAN, 2));
+        Air_Attackers : Presence_Array := (1 => (FAIRY, 1));
+        Ground_Results : array (Tile_Kind) of Tile := (
+            BASE => ((VAMPIRE, 1), BASE),
+            PIT => ((NONE, 0), PIT),
+            FLOOR => ((VAMPIRE, 1), FLOOR),
+            PRODUCER => ((VAMPIRE, 1), PRODUCER),
+            IMPASSABLE => ((NONE, 0), IMPASSABLE),
+            UNKNOWN => ((VAMPIRE, 1), UNKNOWN));
+        Both_Results : array (Tile_Kind) of Tile := (
+            BASE => ((HUMAN, 2), BASE),
+            PIT => ((NONE, 0), PIT),
+            FLOOR => ((HUMAN, 2), FLOOR),
+            PRODUCER => ((HUMAN, 2), PRODUCER),
+            IMPASSABLE => ((NONE, 0), IMPASSABLE),
+            UNKNOWN => ((HUMAN, 2), UNKNOWN));
+        Air_Results : array (Tile_Kind) of Tile := (
+            BASE => ((FAIRY, 1), BASE),
+            PIT => ((FAIRY, 1), PIT),
+            FLOOR => ((FAIRY, 1), FLOOR),
+            PRODUCER => ((FAIRY, 1), PRODUCER),
+            IMPASSABLE => ((NONE, 0), IMPASSABLE),
+            UNKNOWN => ((FAIRY, 1), UNKNOWN));
     begin
-        null;
+        for Which in Test_Tiles'Range loop
+            Check_Tile_Event (
+                Input => Test_Tiles (Which),
+                Attackers => Ground_Attackers,
+                Create => False,
+                Expected => Ground_Results (Which));
+            Check_Tile_Event (
+                Input => Test_Tiles (Which),
+                Attackers => Both_Attackers,
+                Create => False,
+                Expected => Both_Results (Which));
+            Check_Tile_Event (
+                Input => Test_Tiles (Which),
+                Attackers => Air_Attackers,
+                Create => False,
+                Expected => Air_Results (Which));
+        end loop;
     end Test_Unusual_Tiles;
 
 end Test_Tile;

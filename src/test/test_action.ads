@@ -17,4 +17,4 @@ private
         2 => (
             Callback => Test_Stress'Access,
             Name => Test_Stress_Name'Access));
-end Test_Coordinate;
+end Test_Action;

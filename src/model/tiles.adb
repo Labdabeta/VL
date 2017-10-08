@@ -89,7 +89,7 @@ package body Tiles is
         end Check_Matchup;
 
         Attendance : Attendance_Array := (others => False);
-        Duplicated : Attendance_Array := (others => False);
+        Duplicated : Attendance_Array := (NONE => True, others => False);
         Check_Unit : Occupant;
         Victor : Occupant := NONE;
     begin

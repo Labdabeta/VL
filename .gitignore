@@ -15,6 +15,7 @@ tags
 *.o
 *.gcno
 *.gcda
+build/
 
 # Executables
 *.out
