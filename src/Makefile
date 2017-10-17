@@ -4,6 +4,16 @@ BUILD_DIR=../build
 default: all
 	true
 
+clean :
+	rm ../build/* ../bin/*
+
+viewcoverage : force_make
+	gcov ../build/.gcno
+	lcov --capture --directory ../build/ --output-file test.info
+	genhtml test.info --output-directory html
+	rm test.info
+	firefox html/index.html
+
 run% : force_make
 	../bin/$*.out
 

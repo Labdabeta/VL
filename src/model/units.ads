@@ -10,6 +10,8 @@ package Units is
         UNKNOWN     => 6);
     subtype Unit is Occupant range VAMPIRE .. ZOMBIE;
 
+    Num_Unit_Types : constant := 5;
+
     function To_String (
         This : in Occupant)
         return String;

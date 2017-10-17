@@ -17,5 +17,8 @@ tags
 *.gcda
 build/
 
+# Coverage files
+html/
+
 # Executables
 *.out

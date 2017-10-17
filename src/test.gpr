@@ -6,7 +6,17 @@ project Test is
     for Exec_Dir use "../bin";
     for Main use ("main.adb");
 
-    package Compiler renames Shared.Compiler;
+    package Compiler is
+        for Default_Switches ("Ada") use
+            Shared.Compiler'Default_Switches ("Ada") &
+            ("-fprofile-arcs",
+             "-ftest-coverage",
+             "-g");
+    end Compiler;
+
+    package Linker is
+        for Default_Switches ("Ada") use ("-fprofile-arcs");
+    end Linker;
 
     package Builder is
         for Executable ("main.adb") use "test.out";

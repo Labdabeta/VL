@@ -1,5 +1,6 @@
 with Coordinates;
 with Units;
+with Tiles;
 
 package Actions is
     type Action_Kind is (MOVE, CREATE, DESTROY, INFECT, SPAWN);
@@ -28,4 +29,10 @@ package Actions is
         return Boolean;
 
     type Action_Array is array (Positive range <>) of Action;
+
+    function Get_Actions_From (
+        What : in Tiles.Tile;
+        Where : in Coordinates.Coordinate;
+        Board_Size : in Coordinates.Coordinate)
+        return Action_Array;
 end Actions;

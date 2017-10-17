@@ -1,7 +1,6 @@
 with Actions;
 with Ada.Streams;
 with Coordinates;
-with Players;
 with Tiles;
 
 package Boards is
@@ -22,11 +21,15 @@ package Boards is
         return Tiles.Tile
         with Pre => (From.X <= This.Width and From.Y <= This.Height);
 
-    --  Dynamically builds the appropriate player
-    function Get_Player (
+    function Get_Actions_From (
         This : in Board;
-        Team : in Positive)
-        return Players.Player;
+        From : in Coordinates.Coordinate)
+        return Actions.Action_Array;
+
+    function Is_Valid (
+        This : in Board;
+        What : in Actions.Action)
+        return Boolean;
 
     procedure Apply_Actions (
         This : in out Board;

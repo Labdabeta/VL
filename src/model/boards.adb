@@ -9,6 +9,8 @@ package body Boards is
 
     begin
 
+        --  REMEMBER: Spawn/Infect take place in a 'generation' phase AFTER
+        --  movement resolution. Also you can't generate on an occupied square.
         null;
         -- TODO
 
@@ -26,20 +28,15 @@ package body Boards is
         return New_Board;
     end Create_Board;
 
-    function Get_Player (
+    function Get_Actions_From (
         This : in Board;
-        Team : in Positive)
-        return Players.Player is
-
-        Temp_Bases : Players.Coordinate_List (1 .. 1) := (others => (1, 1));
-        Temp_Units : Players.Coordinate_List (1 .. 0) := (others => (1, 1));
-        Temp_Types : Players.Type_List (1 .. 0) := (others => Units.VAMPIRE);
+        From : in Coordinates.Coordinate)
+        return Actions.Action_Array is
+        Empty_Array : Actions.Action_Array (1 .. 0) := (
+            others => ((1, 1), (1, 1), Actions.MOVE, Units.VAMPIRE, 1));
     begin
-
-        return Players.New_Player (1, Temp_Bases, Temp_Units, Temp_Types, 0);
-        -- TODO
-
-    end Get_Player;
+        return Empty_Array;
+    end Get_Actions_From;
 
     function Get_Tile (
         This : in Board;
@@ -73,6 +70,14 @@ package body Boards is
         -- TODO
 
     end Input;
+
+    function Is_Valid (
+        This : in Board;
+        What : in Actions.Action)
+        return Boolean is
+    begin
+        return False;
+    end Is_Valid;
 
     function Localize (
         This : in Board;

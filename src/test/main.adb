@@ -13,8 +13,7 @@ procedure Main is
         1 => Test_Board.Suite'Access,
         2 => Test_Coordinate.Suite'Access,
         3 => Test_Tile.Suite'Access,
-        4 => Test_Action.Suite'Access
-        );
+        4 => Test_Action.Suite'Access);
 
     Success : Boolean := True;
 

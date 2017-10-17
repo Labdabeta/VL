@@ -215,8 +215,31 @@ package body Test_Tile is
     end Test_Singles;
 
     procedure Test_Stress is
+        Test_Tiles : array (Tile_Kind) of Tile := (
+            BASE => ((NONE, 0), BASE),
+            PIT => ((FAIRY, 3), PIT),
+            FLOOR => ((LEPRECHAUN, 2), FLOOR),
+            PRODUCER => ((VAMPIRE, 1), PRODUCER),
+            IMPASSABLE => ((HUMAN, 0), IMPASSABLE),
+            UNKNOWN => ((UNKNOWN, 0), UNKNOWN));
+        Test_Results : array (Tile_Kind) of String (1 .. 3) := (
+            BASE => "# 0",
+            PIT => " F3",
+            FLOOR => "_L2",
+            PRODUCER => "$V1",
+            IMPASSABLE => "XH0",
+            UNKNOWN => "??0");
+        Extra_Test_Tile : Tile := ((ZOMBIE, 10), FLOOR);
+        Extra_Test_Result : String := "_Z10";
     begin
-        null;
+        for Which in Test_Tiles'Range loop
+            Assert (
+                To_String (Test_Tiles (Which)) = Test_Results (Which),
+                "Expected: " & Test_Results (Which));
+        end loop;
+        Assert (
+            To_String (Extra_Test_Tile) = Extra_Test_Result,
+            "Expected: " & Extra_Test_Result);
     end Test_Stress;
 
     procedure Test_Triples is
