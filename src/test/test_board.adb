@@ -11,9 +11,14 @@ package body Test_Board is
     function Small_Board_Post_Post return Board;
     function Small_Board_Win return Board;
     function Small_Board_Actions return Action_Array;
+    function Small_Board_Actions_Localized return Action_Array;
     function Small_Board_Post_Actions return Action_Array;
     function Small_Board_Post_Bad_Actions return Action_Array;
     function Board_Equality (A, B : in Board) return Boolean;
+    procedure Assert_Equal_Action_Set (
+        First : in Action_Array;
+        Second : in Action_Array;
+        Message : in String);
 
     procedure Action_Test is
         Initial : Board := Small_Board;
@@ -22,6 +27,23 @@ package body Test_Board is
         Events : Action_Array := Small_Board_Actions;
         Post_Events : Action_Array := Small_Board_Post_Actions;
         Bad_Events : Action_Array := Small_Board_Post_Bad_Actions;
+        Test_Actions : Action_Array := (
+            1 => ((2, 4), (1, 3), MOVE, ZOMBIE, 1),
+            2 => ((2, 4), (2, 3), MOVE, ZOMBIE, 1),
+            3 => ((2, 4), (3, 3), MOVE, ZOMBIE, 1),
+            4 => ((2, 4), (1, 4), MOVE, ZOMBIE, 1),
+            5 => ((2, 4), (3, 4), MOVE, ZOMBIE, 1),
+            6 => ((2, 4), (1, 5), MOVE, ZOMBIE, 1),
+            7 => ((2, 4), (2, 5), MOVE, ZOMBIE, 1),
+            8 => ((2, 4), (3, 5), MOVE, ZOMBIE, 1),
+            9 => ((2, 4), (1, 3), INFECT, ZOMBIE, 1),
+            10 => ((2, 4), (2, 3), INFECT, ZOMBIE, 1),
+            11 => ((2, 4), (3, 3), INFECT, ZOMBIE, 1),
+            12 => ((2, 4), (1, 4), INFECT, ZOMBIE, 1),
+            13 => ((2, 4), (3, 4), INFECT, ZOMBIE, 1),
+            14 => ((2, 4), (1, 5), INFECT, ZOMBIE, 1),
+            15 => ((2, 4), (2, 5), INFECT, ZOMBIE, 1),
+            16 => ((2, 4), (3, 5), INFECT, ZOMBIE, 1));
     begin
         for Index in Events'Range loop
             Assert (
@@ -61,6 +83,10 @@ package body Test_Board is
                 To_String (Final));
         end loop;
 
+        Assert_Equal_Action_Set (
+            Test_Actions,
+            Get_Actions_From (Final, (2, 4)),
+            "Wrong actions discovered.");
     end Action_Test;
 
     procedure Assert_Equal_Action_Set (
@@ -112,6 +138,15 @@ package body Test_Board is
             "Localization failed. Expected: " & ASCII.LF &
             To_String (Small_Board_Localized) & ASCII.LF & "Got: " & ASCII.LF &
             To_String (Localize (Small_Board, 1)));
+
+        Assert_Equal_Action_Set (
+            Small_Board_Actions_Localized,
+            Localize_Actions (Small_Board, 1, Small_Board_Actions),
+            "Localization of actions failed.");
+
+        Assert (
+            Num_Actions (Small_Board, 1) = 1,
+            "Player 1 should actually only have 1 action.");
     end Basic_Test;
 
     function Board_Equality (A, B : in Board) return Boolean is
@@ -183,6 +218,21 @@ package body Test_Board is
     begin
         return Results;
     end Small_Board_Actions;
+
+    function Small_Board_Actions_Localized return Action_Array is
+        Results : Action_Array := (
+            1 => ((1, 1), (2, 1), MOVE, VAMPIRE, 1),
+            2 => ((1, 2), (2, 2), MOVE, LEPRECHAUN, 1),
+            3 => ((1, 3), (2, 3), MOVE, HUMAN, 1),
+            4 => ((1, 4), (2, 4), MOVE, ZOMBIE, 1),
+            5 => ((1, 5), (2, 5), MOVE, FAIRY, 1),
+            6 => ((5, 1), (3, 1), MOVE, VAMPIRE, 2),
+            7 => ((5, 2), (4, 3), CREATE, LEPRECHAUN, 2),
+            8 => ((5, 3), (4, 3), DESTROY, HUMAN, 2),
+            9 => ((5, 4), (4, 4), INFECT, ZOMBIE, 2));
+    begin
+        return Results;
+    end Small_Board_Actions_Localized;
 
     function Small_Board_Localized return Board is
         Result : Board := Create_Board (5, 5);
