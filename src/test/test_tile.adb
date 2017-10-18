@@ -8,6 +8,10 @@ package body Test_Tile is
         Value_Type => Tile,
         To_String => To_String);
 
+    procedure Assert_Tile_IO is new Assert_IO (
+        Any_Type => Tile,
+        To_String => To_String);
+
     -- Helper function
     procedure Check_Tile_Event (
         Input : in Tile;
@@ -40,7 +44,8 @@ package body Test_Tile is
             2 => (LEPRECHAUN, 2),
             3 => (HUMAN, 3),
             4 => (FAIRY, 4),
-            5 => (ZOMBIE, 5));
+            5 => (ZOMBIE, 5),
+            others => (NONE, 0));
     begin
         for The_Occupant in Test_Tiles'Range loop
             Check_Tile_Event (
@@ -53,7 +58,8 @@ package body Test_Tile is
 
     procedure Test_Basic is
         The_Tile : Tile := ((NONE, 1), FLOOR);
-        Attackers : Presence_Array := ((VAMPIRE, 1), (LEPRECHAUN, 2));
+        Attackers : Presence_Array := ((VAMPIRE, 1), (LEPRECHAUN, 2),
+            others => (NONE, 0));
         Result_Tile : Tile := ((LEPRECHAUN, 2), FLOOR);
     begin
         Check_Tile_Event (The_Tile, Attackers, False, Result_Tile);
@@ -61,9 +67,11 @@ package body Test_Tile is
 
     procedure Test_Create is
         The_Tile : Tile := ((NONE, 1), PIT);
-        No_Attackers : Presence_Array (1 .. 0);
-        Fairy_Attacker : Presence_Array := (1 => (FAIRY, 1));
-        Human_Attacker : Presence_Array := (1 => (HUMAN, 1));
+        No_Attackers : Presence_Array := (others => (NONE, 0));
+        Fairy_Attacker : Presence_Array := (
+            1 => (FAIRY, 1), others => (NONE, 0));
+        Human_Attacker : Presence_Array := (
+            1 => (HUMAN, 1), others => (NONE, 0));
         Empty_Result_Tile : Tile := ((NONE, 0), FLOOR);
         Fairy_Result_Tile : Tile := ((FAIRY, 1), FLOOR);
         Human_Result_Tile : Tile := ((HUMAN, 1), FLOOR);
@@ -82,7 +90,8 @@ package body Test_Tile is
             ZOMBIE => ((ZOMBIE, 1), FLOOR),
             NONE => ((NONE, 1), FLOOR),
             UNKNOWN => ((UNKNOWN, 1), FLOOR));
-        Vampire_Attacker : Presence_Array := (1 => (VAMPIRE, 2));
+        Vampire_Attacker : Presence_Array := (
+            1 => (VAMPIRE, 2), others => (NONE, 0));
         Vampire_Result_Tiles : array (Occupant) of Tile := (
             VAMPIRE => ((NONE, 0), FLOOR),
             LEPRECHAUN => ((LEPRECHAUN, 1), FLOOR),
@@ -91,7 +100,8 @@ package body Test_Tile is
             ZOMBIE => ((VAMPIRE, 2), FLOOR),
             NONE => ((VAMPIRE, 2), FLOOR),
             UNKNOWN => ((VAMPIRE, 2), FLOOR));
-        Leprechaun_Attacker : Presence_Array := (1 => (LEPRECHAUN, 2));
+        Leprechaun_Attacker : Presence_Array := (
+            1 => (LEPRECHAUN, 2), others => (NONE, 0));
         Leprechaun_Result_Tiles : array (Occupant) of Tile := (
             VAMPIRE => ((LEPRECHAUN, 2), FLOOR),
             LEPRECHAUN => ((NONE, 0), FLOOR),
@@ -100,7 +110,8 @@ package body Test_Tile is
             ZOMBIE => ((LEPRECHAUN, 2), FLOOR),
             NONE => ((LEPRECHAUN, 2), FLOOR),
             UNKNOWN => ((LEPRECHAUN, 2), FLOOR));
-        Human_Attacker : Presence_Array := (1 => (HUMAN, 2));
+        Human_Attacker : Presence_Array := (
+            1 => (HUMAN, 2), others => (NONE, 0));
         Human_Result_Tiles : array (Occupant) of Tile := (
             VAMPIRE => ((VAMPIRE, 1), FLOOR),
             LEPRECHAUN => ((HUMAN, 2), FLOOR),
@@ -109,7 +120,8 @@ package body Test_Tile is
             ZOMBIE => ((ZOMBIE, 1), FLOOR),
             NONE => ((HUMAN, 2), FLOOR),
             UNKNOWN => ((HUMAN, 2), FLOOR));
-        Fairy_Attacker : Presence_Array := (1 => (FAIRY, 2));
+        Fairy_Attacker : Presence_Array := (
+            1 => (FAIRY, 2), others => (NONE, 0));
         Fairy_Result_Tiles : array (Occupant) of Tile := (
             VAMPIRE => ((FAIRY, 2), FLOOR),
             LEPRECHAUN => ((FAIRY, 2), FLOOR),
@@ -118,7 +130,8 @@ package body Test_Tile is
             ZOMBIE => ((ZOMBIE, 1), FLOOR),
             NONE => ((FAIRY, 2), FLOOR),
             UNKNOWN => ((FAIRY, 2), FLOOR));
-        Zombie_Attacker : Presence_Array := (1 => (ZOMBIE, 2));
+        Zombie_Attacker : Presence_Array := (
+            1 => (ZOMBIE, 2), others => (NONE, 0));
         Zombie_Result_Tiles : array (Occupant) of Tile := (
             VAMPIRE => ((VAMPIRE, 1), FLOOR),
             LEPRECHAUN => ((LEPRECHAUN, 1), FLOOR),
@@ -157,32 +170,43 @@ package body Test_Tile is
         end loop;
     end Test_Doubles;
 
+    procedure Test_IO is
+        Empty_Tile : Tile := ((NONE, 0), FLOOR);
+    begin
+        Assert_Tile_IO (Empty_Tile);
+    end Test_IO;
+
     procedure Test_Quads is
         Not_Vampire_Attacker : Presence_Array := (
             1 => (LEPRECHAUN, 1),
             2 => (HUMAN, 2),
             3 => (FAIRY, 3),
-            4 => (ZOMBIE, 4));
+            4 => (ZOMBIE, 4),
+            others => (NONE, 0));
         Not_Leprechaun_Attacker : Presence_Array := (
             1 => (VAMPIRE, 1),
             2 => (HUMAN, 2),
             3 => (FAIRY, 3),
-            4 => (ZOMBIE, 4));
+            4 => (ZOMBIE, 4),
+            others => (NONE, 0));
         Not_Human_Attacker : Presence_Array := (
             1 => (VAMPIRE, 1),
             2 => (LEPRECHAUN, 2),
             3 => (FAIRY, 3),
-            4 => (ZOMBIE, 4));
+            4 => (ZOMBIE, 4),
+            others => (NONE, 0));
         Not_Fairy_Attacker : Presence_Array := (
             1 => (VAMPIRE, 1),
             2 => (LEPRECHAUN, 2),
             3 => (HUMAN, 3),
-            4 => (ZOMBIE, 4));
+            4 => (ZOMBIE, 4),
+            others => (NONE, 0));
         Not_Zombie_Attacker : Presence_Array := (
             1 => (VAMPIRE, 1),
             2 => (LEPRECHAUN, 2),
             3 => (HUMAN, 3),
-            4 => (FAIRY, 4));
+            4 => (FAIRY, 4),
+            others => (NONE, 0));
         Empty_Tile : Tile := ((NONE, 0), FLOOR);
     begin
         Check_Tile_Event (Empty_Tile, Not_Vampire_Attacker, False, Empty_Tile);
@@ -195,15 +219,20 @@ package body Test_Tile is
 
     procedure Test_Singles is
         Empty_Tile : Tile := ((NONE, 0), FLOOR);
-        Vampire_Attacker : Presence_Array := (1 => (VAMPIRE, 1));
+        Vampire_Attacker : Presence_Array := (
+            1 => (VAMPIRE, 1), others => (NONE, 0));
         Vampire_Tile : Tile := ((VAMPIRE, 1), FLOOR);
-        Leprechaun_Attacker : Presence_Array := (1 => (LEPRECHAUN, 1));
+        Leprechaun_Attacker : Presence_Array := (
+            1 => (LEPRECHAUN, 1), others => (NONE, 0));
         Leprechaun_Tile : Tile := ((LEPRECHAUN, 1), FLOOR);
-        Human_Attacker : Presence_Array := (1 => (HUMAN, 1));
+        Human_Attacker : Presence_Array := (
+            1 => (HUMAN, 1), others => (NONE, 0));
         Human_Tile : Tile := ((HUMAN, 1), FLOOR);
-        Fairy_Attacker : Presence_Array := (1 => (FAIRY, 1));
+        Fairy_Attacker : Presence_Array := (
+            1 => (FAIRY, 1), others => (NONE, 0));
         Fairy_Tile : Tile := ((FAIRY, 1), FLOOR);
-        Zombie_Attacker : Presence_Array := (1 => (ZOMBIE, 1));
+        Zombie_Attacker : Presence_Array := (
+            1 => (ZOMBIE, 1), others => (NONE, 0));
         Zombie_Tile : Tile := ((ZOMBIE, 1), FLOOR);
     begin
         Check_Tile_Event (Empty_Tile, Vampire_Attacker, False, Vampire_Tile);
@@ -222,15 +251,22 @@ package body Test_Tile is
             PRODUCER => ((VAMPIRE, 1), PRODUCER),
             IMPASSABLE => ((HUMAN, 0), IMPASSABLE),
             UNKNOWN => ((UNKNOWN, 0), UNKNOWN));
-        Test_Results : array (Tile_Kind) of String (1 .. 3) := (
-            BASE => "# 0",
-            PIT => " F3",
-            FLOOR => "_L2",
-            PRODUCER => "$V1",
-            IMPASSABLE => "XH0",
-            UNKNOWN => "??0");
+        Test_Results : array (Tile_Kind) of String (1 .. 20) := (
+            BASE => ASCII.ESC & "[46m" & ASCII.ESC & "[97m" & "0" &
+                    ASCII.ESC & "[39m" & ASCII.ESC & "49m",
+            PIT => ASCII.ESC & "[40m" & ASCII.ESC & "[35m" & "3" &
+                    ASCII.ESC & "[39m" & ASCII.ESC & "49m",
+            FLOOR => ASCII.ESC & "[47m" & ASCII.ESC & "[92m" & "2" &
+                    ASCII.ESC & "[39m" & ASCII.ESC & "49m",
+            PRODUCER => ASCII.ESC & "[43m" & ASCII.ESC & "[31m" & "1" &
+                    ASCII.ESC & "[39m" & ASCII.ESC & "49m",
+            IMPASSABLE => ASCII.ESC & "[41m" & ASCII.ESC & "[32m" & "0" &
+                    ASCII.ESC & "[39m" & ASCII.ESC & "49m",
+            UNKNOWN => ASCII.ESC & "[44m" & ASCII.ESC & "[30m" & "0" &
+                    ASCII.ESC & "[39m" & ASCII.ESC & "49m");
         Extra_Test_Tile : Tile := ((ZOMBIE, 10), FLOOR);
-        Extra_Test_Result : String := "_Z10";
+        Extra_Test_Result : String := ASCII.ESC & "[47m" & ASCII.ESC & "[90m" &
+            "10" & ASCII.ESC & "[39m" & ASCII.ESC & "49m";
     begin
         for Which in Test_Tiles'Range loop
             Assert (
@@ -249,17 +285,17 @@ package body Test_Tile is
             HUMAN => ((HUMAN, 1), FLOOR),
             FAIRY => ((FAIRY, 1), FLOOR),
             ZOMBIE => ((ZOMBIE, 1), FLOOR));
-        Attack_Vectors : array (1 .. 10) of Presence_Array (1 .. 2) := (
-            1 => (1 => (VAMPIRE, 2), 2 => (LEPRECHAUN, 3)),
-            2 => (1 => (VAMPIRE, 2), 2 => (HUMAN, 3)),
-            3 => (1 => (VAMPIRE, 2), 2 => (FAIRY, 3)),
-            4 => (1 => (VAMPIRE, 2), 2 => (ZOMBIE, 3)),
-            5 => (1 => (LEPRECHAUN, 2), 2 => (HUMAN, 3)),
-            6 => (1 => (LEPRECHAUN, 2), 2 => (FAIRY, 3)),
-            7 => (1 => (LEPRECHAUN, 2), 2 => (ZOMBIE, 3)),
-            8 => (1 => (HUMAN, 2), 2 => (FAIRY, 3)),
-            9 => (1 => (HUMAN, 2), 2 => (ZOMBIE, 3)),
-            10 => (1 => (FAIRY, 2), 2 => (ZOMBIE, 3)));
+        Attack_Vectors : array (1 .. 10) of Presence_Array := (
+            1 => (1 => (VAMPIRE, 2), 2 => (LEPRECHAUN, 3), others => (NONE, 0)),
+            2 => (1 => (VAMPIRE, 2), 2 => (HUMAN, 3), others => (NONE, 0)),
+            3 => (1 => (VAMPIRE, 2), 2 => (FAIRY, 3), others => (NONE, 0)),
+            4 => (1 => (VAMPIRE, 2), 2 => (ZOMBIE, 3), others => (NONE, 0)),
+            5 => (1 => (LEPRECHAUN, 2), 2 => (HUMAN, 3), others => (NONE, 0)),
+            6 => (1 => (LEPRECHAUN, 2), 2 => (FAIRY, 3), others => (NONE, 0)),
+            7 => (1 => (LEPRECHAUN, 2), 2 => (ZOMBIE, 3), others => (NONE, 0)),
+            8 => (1 => (HUMAN, 2), 2 => (FAIRY, 3), others => (NONE, 0)),
+            9 => (1 => (HUMAN, 2), 2 => (ZOMBIE, 3), others => (NONE, 0)),
+            10 => (1 => (FAIRY, 2), 2 => (ZOMBIE, 3), others => (NONE, 0)));
         Result_Vectors : array (Unit, 1 .. 10) of Tile := (
             VAMPIRE => (
                 1 => ((LEPRECHAUN, 3), FLOOR),
@@ -338,11 +374,12 @@ package body Test_Tile is
             UNKNOWN => ((NONE, 0), UNKNOWN));
         Ground_Attackers : Presence_Array := (
             1 => (VAMPIRE, 1),
-            2 => (HUMAN, 2));
+            2 => (HUMAN, 2), others => (NONE, 0));
         Both_Attackers : Presence_Array := (
             1 => (FAIRY, 1),
-            2 => (HUMAN, 2));
-        Air_Attackers : Presence_Array := (1 => (FAIRY, 1));
+            2 => (HUMAN, 2), others => (NONE, 0));
+        Air_Attackers : Presence_Array := (
+            1 => (FAIRY, 1), others => (NONE, 0));
         Ground_Results : array (Tile_Kind) of Tile := (
             BASE => ((VAMPIRE, 1), BASE),
             PIT => ((NONE, 0), PIT),

@@ -1,6 +1,7 @@
 with Coordinates;
 with Units;
 with Tiles;
+with Ada.Streams;
 
 package Actions is
     type Action_Kind is (MOVE, CREATE, DESTROY, INFECT, SPAWN);
@@ -35,4 +36,39 @@ package Actions is
         Where : in Coordinates.Coordinate;
         Board_Size : in Coordinates.Coordinate)
         return Action_Array;
+
+    function To_String (
+        This : in Action)
+        return String;
+
+    procedure Write (
+        Stream : not null access Ada.Streams.Root_Stream_Type'Class;
+        Item : in Action);
+
+    procedure Read (
+        Stream : not null access Ada.Streams.Root_Stream_Type'Class;
+        Item : out Action);
+
+    procedure Output (
+        Stream : not null access Ada.Streams.Root_Stream_Type'Class;
+        Item : in Action);
+
+    function Input (
+        Stream : not null access Ada.Streams.Root_Stream_Type'Class)
+        return Action;
+
+    for Action'Write use Write;
+    for Action'Read use Read;
+    for Action'Output use Output;
+    for Action'Input use Input;
 end Actions;
+
+-- Action stream format:
+--
+-- 4 bytes: Source.X
+-- 4 bytes: Source.Y
+-- 4 bytes: Target.X
+-- 4 bytes: Target.Y
+-- 4 bits: Kind
+-- 4 bits: Unit
+-- 1 byte: Team

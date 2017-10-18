@@ -1,6 +1,45 @@
 with Units; use Units;
+with Ada.Streams; use Ada.Streams;
 
 package body Tiles is
+
+    function Input (
+        Stream : not null access Ada.Streams.Root_Stream_Type'Class)
+        return Tile is
+        Result : Tile;
+        Buffer : Stream_Element_Array (1 .. 1);
+        Last : Stream_Element_Offset;
+    begin
+        Stream.Read (Buffer, Last);
+        Result.Kind := Tile_Kind'Val (Buffer (1) / 16);
+        Result.Occupant.Unit := Occupant'Val (Buffer (1) mod 16);
+
+        Stream.Read (Buffer, Last);
+        Result.Occupant.Team := Natural (Buffer (1));
+
+        return Result;
+    end Input;
+
+    procedure Output (
+        Stream : not null access Ada.Streams.Root_Stream_Type'Class;
+        Item : in Tile) is
+        Buffer : Stream_Element_Array (1 .. 1);
+    begin
+        Buffer (1) := Stream_Element (
+            Tile_Kind'Pos (Item.Kind) * 16 + Occupant'Pos (Item.Occupant.Unit));
+        Stream.Write (Buffer);
+
+        Buffer (1) := Stream_Element (Item.Occupant.Team);
+        Stream.Write (Buffer);
+    end Output;
+
+    procedure Read (
+        Stream : not null access Ada.Streams.Root_Stream_Type'Class;
+        Item : out Tile) is
+    begin
+        --  Tiles don't have descriminants
+        Item := Tile'Input (Stream);
+    end Read;
 
     procedure Resolve (
         This : in out Tile;
@@ -114,9 +153,10 @@ package body Tiles is
         Victor := Check_Matchup (Attendance);
 
         if Duplicated (Victor) then
-            This.Occupant := (
-                Unit => NONE,
-                Team => 0);
+            This.Occupant.Unit := NONE;
+            if This.Kind /= BASE or Victor /= NONE then
+                This.Occupant.Team := 0;
+            end if;
         else
             for Item in Presence'Range loop
                 if Presence (Item).Unit = Victor then
@@ -142,24 +182,37 @@ package body Tiles is
     begin
         case This.Kind is
             when BASE =>
-                return "#" & To_String (This.Occupant.Unit) &
-                    Team_Image (2 .. Team_Image'Last);
+                return ASCII.ESC & "[46m" & To_String (This.Occupant.Unit) &
+                    Team_Image (2 .. Team_Image'Last) &
+                    ASCII.ESC & "[39m" & ASCII.ESC & "49m";
             when PIT =>
-                return " " & To_String (This.Occupant.Unit) &
-                    Team_Image (2 .. Team_Image'Last);
+                return ASCII.ESC & "[40m" & To_String (This.Occupant.Unit) &
+                    Team_Image (2 .. Team_Image'Last) &
+                    ASCII.ESC & "[39m" & ASCII.ESC & "49m";
             when FLOOR =>
-                return "_" & To_String (This.Occupant.Unit) &
-                    Team_Image (2 .. Team_Image'Last);
+                return ASCII.ESC & "[47m" & To_String (This.Occupant.Unit) &
+                    Team_Image (2 .. Team_Image'Last) &
+                    ASCII.ESC & "[39m" & ASCII.ESC & "49m";
             when PRODUCER =>
-                return "$" & To_String (This.Occupant.Unit) &
-                    Team_Image (2 .. Team_Image'Last);
+                return ASCII.ESC & "[43m" & To_String (This.Occupant.Unit) &
+                    Team_Image (2 .. Team_Image'Last) &
+                    ASCII.ESC & "[39m" & ASCII.ESC & "49m";
             when IMPASSABLE =>
-                return "X" & To_String (This.Occupant.Unit) &
-                    Team_Image (2 .. Team_Image'Last);
+                return ASCII.ESC & "[41m" & To_String (This.Occupant.Unit) &
+                    Team_Image (2 .. Team_Image'Last) &
+                    ASCII.ESC & "[39m" & ASCII.ESC & "49m";
             when UNKNOWN =>
-                return "?" & To_String (This.Occupant.Unit) &
-                    Team_Image (2 .. Team_Image'Last);
+                return ASCII.ESC & "[44m" & To_String (This.Occupant.Unit) &
+                    Team_Image (2 .. Team_Image'Last) &
+                    ASCII.ESC & "[39m" & ASCII.ESC & "49m";
         end case;
     end To_String;
 
+    procedure Write (
+        Stream : not null access Ada.Streams.Root_Stream_Type'Class;
+        Item : in Tile) is
+    begin
+        --  Tiles don't have descriminants
+        Tile'Output (Stream, Item);
+    end Write;
 end Tiles;

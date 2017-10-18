@@ -31,6 +31,7 @@ package Boards is
         What : in Actions.Action)
         return Boolean;
 
+    --  Does not check for validity, actions must already be valid on call
     procedure Apply_Actions (
         This : in out Board;
         Action_List : in Actions.Action_Array);
@@ -40,10 +41,35 @@ package Boards is
         This : in Board)
         return Natural;
 
+    type Player_List is array (Positive range <>) of Natural;
+    function Get_Players (
+        This : in Board)
+        return Player_List;
+
+    function Num_Actions (
+        This : in Board;
+        Team : in Positive)
+        return Natural;
+
     function Localize (
         This : in Board;
         Team : in Positive)
         return Board;
+
+    --  TODO: Add localization of actions. UI can then allow you to hot-switch
+    --  between "projected last turn" and current turn. Just render the old
+    --  actions and any unit with no action is rendered as it is "now".
+    function Localize_Actions (
+        This : in Board;
+        Team : in Positive;
+        Action_List : in Actions.Action_Array)
+        return Actions.Action_Array;
+
+    function Is_Visible (
+        This : in Board;
+        Team : in Positive;
+        Where : in Coordinates.Coordinate)
+        return Boolean;
 
     procedure Write (
         Stream : not null access Ada.Streams.Root_Stream_Type'Class;
@@ -80,4 +106,8 @@ end Boards;
 
 -- Board stream format:
 --
--- TODO
+-- RAW
+-- ---
+-- 4 bytes: Width
+-- 4 bytes: Height
+-- Width * Height * 2 bytes: The tiles, scanned left-to-right

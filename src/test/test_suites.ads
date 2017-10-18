@@ -32,6 +32,14 @@ package Test_Suites is
     procedure Assert_Same (
         Value : in Value_Type;
         Expected : in Value_Type);
+
+    generic
+        type Any_Type (<>) is private;
+        with function "=" (X, Y : in Any_Type) return Boolean is <>;
+        with function To_String (X : in Any_Type) return String;
+    procedure Assert_IO (
+        Value : in Any_Type);
 private
     Successes : Natural := 0;
+    IO_Num : Natural := 0;
 end Test_Suites;

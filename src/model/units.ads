@@ -12,6 +12,17 @@ package Units is
 
     Num_Unit_Types : constant := 5;
 
+    Vision : constant array (Occupant) of Natural := (
+        VAMPIRE => 4,
+        LEPRECHAUN => 3,
+        HUMAN => 3,
+        FAIRY => 3,
+        ZOMBIE => 2,
+        NONE => 0,
+        UNKNOWN => 0);
+
+    Max_Vision : constant := 4;
+
     function To_String (
         This : in Occupant)
         return String;

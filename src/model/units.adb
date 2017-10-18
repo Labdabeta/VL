@@ -5,13 +5,13 @@ package body Units is
         return String is
     begin
         case This is
-            when VAMPIRE => return "V";
-            when LEPRECHAUN => return "L";
-            when HUMAN => return "H";
-            when FAIRY => return "F";
-            when ZOMBIE => return "Z";
-            when NONE => return " ";
-            when UNKNOWN => return "?";
+            when VAMPIRE => return ASCII.ESC & "[31m";
+            when LEPRECHAUN => return ASCII.ESC & "[92m";
+            when HUMAN => return ASCII.ESC & "[32m";
+            when FAIRY => return ASCII.ESC & "[35m";
+            when ZOMBIE => return ASCII.ESC & "[90m";
+            when NONE => return ASCII.ESC & "[97m";
+            when UNKNOWN => return ASCII.ESC & "[30m";
         end case;
     end To_String;
 

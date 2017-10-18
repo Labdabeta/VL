@@ -1,6 +1,7 @@
 with Units; use Units;
 with Tiles; use Tiles;
 with Coordinates; use Coordinates;
+with Ada.Streams; use Ada.Streams;
 
 package body Actions is
 
@@ -104,7 +105,7 @@ package body Actions is
 
             if Where.X > 2 then
                 Length := Length + 1;
-                Results (Length + 1) := (
+                Results (Length) := (
                     Source => Where,
                     Target => (Where.X - 2, Where.Y),
                     Kind => MOVE,
@@ -114,7 +115,7 @@ package body Actions is
 
             if Where.Y > 2 then
                 Length := Length + 1;
-                Results (Length + 1) := (
+                Results (Length) := (
                     Source => Where,
                     Target => (Where.X, Where.Y - 2),
                     Kind => MOVE,
@@ -124,7 +125,7 @@ package body Actions is
 
             if Where.X < Board_Size.X - 2 then
                 Length := Length + 1;
-                Results (Length + 1) := (
+                Results (Length) := (
                     Source => Where,
                     Target => (Where.X + 2, Where.Y),
                     Kind => MOVE,
@@ -134,7 +135,7 @@ package body Actions is
 
             if Where.Y < Board_Size.Y - 2 then
                 Length := Length + 1;
-                Results (Length + 1) := (
+                Results (Length) := (
                     Source => Where,
                     Target => (Where.X, Where.Y + 2),
                     Kind => MOVE,
@@ -179,6 +180,28 @@ package body Actions is
             when others => return Empty_Array;
         end case;
     end Get_Actions_From;
+
+    function Input (
+        Stream : not null access Ada.Streams.Root_Stream_Type'Class)
+        return Action is
+        Result : Action;
+        Buffer : Stream_Element_Array (1 .. 1);
+        Last : Stream_Element_Offset;
+    begin
+        Result.Source.X := Positive'Input (Stream);
+        Result.Source.Y := Positive'Input (Stream);
+        Result.Target.X := Positive'Input (Stream);
+        Result.Target.Y := Positive'Input (Stream);
+
+        Stream.Read (Buffer, Last);
+        Result.Kind := Action_Kind'Val (Buffer (1) / 16);
+        Result.Unit := Unit'Val (Buffer (1) mod 16);
+
+        Stream.Read (Buffer, Last);
+        Result.Team := Natural (Buffer (1));
+
+        return Result;
+    end Input;
 
     function Is_Valid (
         This : in Action)
@@ -237,4 +260,56 @@ package body Actions is
         end case;
     end Is_Valid;
 
+    procedure Output (
+        Stream : not null access Ada.Streams.Root_Stream_Type'Class;
+        Item : in Action) is
+        Buffer : Stream_Element_Array (1 .. 1);
+    begin
+        Positive'Output (Stream, Item.Source.X);
+        Positive'Output (Stream, Item.Source.Y);
+        Positive'Output (Stream, Item.Target.X);
+        Positive'Output (Stream, Item.Target.Y);
+
+        Buffer (1) := Stream_Element (
+            Action_Kind'Pos (Item.Kind) * 16 + Unit'Pos (Item.Unit));
+        Stream.Write (Buffer);
+
+        Buffer (1) := Stream_Element (Item.Team);
+        Stream.Write (Buffer);
+    end Output;
+
+    procedure Read (
+        Stream : not null access Ada.Streams.Root_Stream_Type'Class;
+        Item : out Action) is
+    begin
+        --  Actions don't have descriminants
+        Item := Action'Input (Stream);
+    end Read;
+
+    function To_String (
+        This : in Action)
+        return String is
+    begin
+        if This.Kind = MOVE then
+            return Positive'Image (This.Source.X) & "," &
+                Positive'Image (This.Source.Y) & " -> " &
+                Positive'Image (This.Target.X) & "," &
+                Positive'Image (This.Target.Y) & " (" &
+                To_String (This.Unit) & Positive'Image (This.Team) & ")";
+        else
+            return Positive'Image (This.Source.X) & "," &
+                Positive'Image (This.Source.Y) & " ~> " &
+                Positive'Image (This.Target.X) & "," &
+                Positive'Image (This.Target.Y) & " (" &
+                To_String (This.Unit) & Positive'Image (This.Team) & ")";
+        end if;
+    end To_String;
+
+    procedure Write (
+        Stream : not null access Ada.Streams.Root_Stream_Type'Class;
+        Item : in Action) is
+    begin
+        --  Actions don't have descriminants
+        Action'Output (Stream, Item);
+    end Write;
 end Actions;
