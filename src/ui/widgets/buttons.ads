@@ -4,7 +4,7 @@ package Buttons is
     type Button is
         record
             Area : SDL.Rectangle;
-            Normal, Hover, Pressed : SDL.Image;
+            Overlay : SDL.Image;
             --  True if the current mouse-click started on this button
             Was_Pressed : Boolean;
         end record;

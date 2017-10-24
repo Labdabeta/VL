@@ -73,6 +73,8 @@ package SDL is
             Texture : System.Address;
         end record;
 
+    Null_Image : constant Image := (1, 1, System.Null_Address);
+
     type Rectangle is
         record
             Left, Top, Width, Height : Natural;
@@ -131,6 +133,8 @@ package SDL is
         Center : in Coordinate := (0, 0);
         VFlip : in Boolean := False;
         HFlip : in Boolean := False);
+
+    function Is_Null (Which : in Image) return Boolean;
 
 --------------------------------------------------------------------------------
     --  Font Functions

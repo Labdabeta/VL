@@ -328,8 +328,15 @@ package body SDL is
             return False;
         end if;
 
+        State.Window.Width := Width;
+        State.Window.Height := Height;
         return True;
     end Initialize;
+
+    function Is_Null (Which : in Image) return Boolean is
+    begin
+        return Which.Texture = System.Null_Address;
+    end Is_Null;
 
     function Load_Font (Path : in String; Size : in Positive) return Font is
         Result : Font := (Size, System.Null_Address);

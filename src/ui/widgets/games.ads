@@ -3,11 +3,7 @@ with Boards;
 with SDL;
 
 package Games is
-    Max_Players : constant := 255;
-
-    procedure Initialize;
-    procedure Finalize;
-
+    Max_Players : constant := 16;
     procedure Draw_Board (
         Which : in Boards.Board;
         Where : in SDL.Rectangle);

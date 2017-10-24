@@ -8,4 +8,3 @@ package Main_Menu is
 
     function Process_Event (What : in SDL.Event) return Screens.Transition;
 end Main_Menu;
-

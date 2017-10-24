@@ -1,82 +1,61 @@
 with SDL; use SDL;
-with Buttons; use Buttons;
-with Games;
-with Boards;
-with Actions;
-with Units; use Units;
-with Tiles; use Tiles;
+with Screens;
+with Sprites;
+with Fonts;
+with Main_Menu;
+
+with Ada.Real_Time; use Ada.Real_Time;
+with Ada.Text_IO; use Ada.Text_IO;
 
 procedure Main is
-    function Small_Board return Boards.Board is
-        Result : Boards.Board := Boards.Create_Board (5, 5);
-    begin
-        Boards.Set_Tile (Result, (1, 1), ((VAMPIRE, 1), FLOOR));
-        Boards.Set_Tile (Result, (1, 2), ((LEPRECHAUN, 1), FLOOR));
-        Boards.Set_Tile (Result, (1, 3), ((HUMAN, 1), FLOOR));
-        Boards.Set_Tile (Result, (1, 4), ((ZOMBIE, 1), FLOOR));
-        Boards.Set_Tile (Result, (1, 5), ((FAIRY, 1), FLOOR));
-        Boards.Set_Tile (Result, (2, 1), ((NONE, 0), PRODUCER));
-        Boards.Set_Tile (Result, (2, 2), ((NONE, 0), FLOOR));
-        Boards.Set_Tile (Result, (2, 3), ((NONE, 1), BASE));
-        Boards.Set_Tile (Result, (2, 4), ((NONE, 0), FLOOR));
-        Boards.Set_Tile (Result, (2, 5), ((NONE, 0), PRODUCER));
-        Boards.Set_Tile (Result, (3, 1), ((NONE, 0), FLOOR));
-        Boards.Set_Tile (Result, (3, 2), ((NONE, 0), FLOOR));
-        Boards.Set_Tile (Result, (3, 3), ((NONE, 0), PRODUCER));
-        Boards.Set_Tile (Result, (3, 4), ((NONE, 0), FLOOR));
-        Boards.Set_Tile (Result, (3, 5), ((NONE, 0), FLOOR));
-        Boards.Set_Tile (Result, (4, 1), ((NONE, 0), PRODUCER));
-        Boards.Set_Tile (Result, (4, 2), ((NONE, 0), FLOOR));
-        Boards.Set_Tile (Result, (4, 3), ((NONE, 2), BASE));
-        Boards.Set_Tile (Result, (4, 4), ((NONE, 0), FLOOR));
-        Boards.Set_Tile (Result, (4, 5), ((NONE, 0), PRODUCER));
-        Boards.Set_Tile (Result, (5, 1), ((VAMPIRE, 2), FLOOR));
-        Boards.Set_Tile (Result, (5, 2), ((LEPRECHAUN, 2), FLOOR));
-        Boards.Set_Tile (Result, (5, 3), ((HUMAN, 2), FLOOR));
-        Boards.Set_Tile (Result, (5, 4), ((ZOMBIE, 2), FLOOR));
-        Boards.Set_Tile (Result, (5, 5), ((FAIRY, 2), FLOOR));
-        return Result;
-    end Small_Board;
-
-    function Small_Board_Actions return Actions.Action_Array is
-        Results : Actions.Action_Array := (
-            1 => ((1, 1), (2, 1), Actions.MOVE, VAMPIRE, 1),
-            2 => ((1, 2), (2, 2), Actions.MOVE, LEPRECHAUN, 1),
-            3 => ((1, 3), (2, 3), Actions.MOVE, HUMAN, 1),
-            4 => ((1, 4), (2, 4), Actions.MOVE, ZOMBIE, 1),
-            5 => ((1, 5), (2, 5), Actions.MOVE, FAIRY, 1),
-            6 => ((5, 1), (3, 1), Actions.MOVE, VAMPIRE, 2),
-            7 => ((5, 2), (4, 3), Actions.CREATE, LEPRECHAUN, 2),
-            8 => ((5, 3), (4, 3), Actions.DESTROY, HUMAN, 2),
-            9 => ((5, 4), (4, 4), Actions.INFECT, ZOMBIE, 2),
-            10 => ((5, 5), (4, 5), Actions.MOVE, FAIRY, 2));
-    begin
-        return Results;
-    end Small_Board_Actions;
-
-    A_Board : Boards.Board := Small_Board;
-    Acts : Actions.Action_Array := Small_Board_Actions;
+    Current : Screens.Screen := Screens.MAIN_MENU;
+    Next : Time;
+    One_Frame : Time_Span := Microseconds (16667);
 begin
     if not Initialize ("Vampire Leprechauns", 1024, 768) then
         return;
     end if;
 
-    Games.Initialize;
+    Sprites.Initialize;
+    Fonts.Initialize;
+    Main_Menu.Initialize;
+
+    Frame_Loop : loop
+        Next := Clock + One_Frame;
+        Event_Loop : loop
+            declare
+                E : Event := Step;
+            begin
+                if E.Kind = QUIT_EVENT then
+                    exit Frame_Loop;
+                elsif E.Kind = NO_EVENT then
+                    exit Event_Loop;
+                end if;
+                case Current is
+                    when Screens.MAIN_MENU =>
+                        Screens.Apply_Transition (
+                            Main_Menu.Process_Event (E),
+                            Current);
+                    when others => exit Frame_Loop;
+                end case;
+            end;
+        end loop Event_Loop;
 
         Begin_Draw;
-        Games.Draw_Board (A_Board, (0, 0, 1024, 768));
-        Games.Draw_Actions (A_Board, Acts, (0, 0, 1024, 768));
+        case Current is
+            when Screens.MAIN_MENU =>
+                Main_Menu.Draw;
+            when others => exit Frame_Loop;
+        end case;
         End_Draw;
-    loop
-        declare
-            E : Event := Step;
-        begin
-            if E.Kind = QUIT_EVENT then
-                exit;
-            end if;
-        end;
-    end loop;
 
-    Games.Finalize;
+        if Next > Clock then
+            delay To_Duration (abs (Next - Clock));
+        end if;
+    end loop Frame_Loop;
+
+    Main_Menu.Finalize;
+    Fonts.Finalize;
+    Sprites.Finalize;
     Finalize;
 end Main;

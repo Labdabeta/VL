@@ -1,22 +1,13 @@
 with Actions;
 with Ada.Numerics.Generic_Elementary_Functions;
 with Ada.Numerics;
-with Paths;
+with Sprites;
 with SDL;
 with Tiles; use Tiles;
 with Units; use Units;
 
 package body Games is
     package Math is new Ada.Numerics.Generic_Elementary_Functions (Float);
-
-    Sprite_Dimension : constant := 64;
-
-    Unit_Sprite_Sheets : array (Units.Unit) of SDL.Image;
-
-    Arrows_Sprite_Sheet : SDL.Image;
-    Spawn_Sprite_Sheet : SDL.Image;
-    Base_Sprite_Sheet : SDL.Image;
-    Tile_Sprite_Sheet : SDL.Image;
 
     procedure Draw_Actions (
         Reference : in Boards.Board;
@@ -85,7 +76,7 @@ package body Games is
             SDL.Draw_Image (
                 Arrows_Sprite_Sheet,
                 Where,
-                Paths.Arrow_Sprite_Clips (Which.Kind),
+                Sprites.Arrow_Sprite_Clips (Which.Kind),
                 Rotation,
                 (0, Where.Height / 2));
         end Render_Action;
@@ -93,11 +84,11 @@ package body Games is
         for Index in Which'Range loop
             if Which (Index).Kind = Actions.SPAWN then
                 SDL.Draw_Image (
-                    Spawn_Sprite_Sheet,
+                    Sprites.Spawn_Sprites,
                     (Left => Offset_X + Delta_X * (Which (Index).Source.X - 1),
                      Top => Offset_Y + Delta_Y * (Which (Index).Source.Y - 1),
                      Width => Delta_X, Height => Delta_Y),
-                    Paths.Spawn_Sprite_Clips (Which (Index).Unit));
+                    Sprites.Spawn_Sprite_Clips (Which (Index).Unit));
             else
                 Render_Action (
                     Which => Which (Index),
@@ -126,23 +117,23 @@ package body Games is
         begin
             if Which.Kind = Tiles.BASE then
                 SDL.Draw_Image (
-                    Base_Sprite_Sheet,
+                    Sprites.Base_Sprites,
                     Where,
-                    Paths.Base_Sprite_Clips (Which.Occupant.Team));
+                    Sprites.Base_Sprite_Clips (Which.Occupant.Team));
             else
                 SDL.Draw_Image (
-                    Tile_Sprite_Sheet,
+                    Sprites.Tile_Sprites,
                     Where,
-                    Paths.Tile_Sprite_Clips (Which.Kind));
+                    Sprites.Tile_Sprite_Clips (Which.Kind));
             end if;
 
             if Which.Occupant.Unit /= Units.NONE and
                 Which.Occupant.Unit /= Units.UNKNOWN
             then
                 SDL.Draw_Image (
-                    Unit_Sprite_Sheets (Which.Occupant.Unit),
+                    Sprites.Unit_Sprites (Which.Occupant.Unit),
                     Where,
-                    Paths.Unit_Sprite_Clips (Which.Occupant.Team));
+                    Sprites.Unit_Sprite_Clips (Which.Occupant.Team));
             end if;
         end Render_Tile;
     begin
@@ -159,26 +150,4 @@ package body Games is
             end loop;
         end loop;
     end Draw_Board;
-
-    procedure Finalize is begin
-        for U in Unit_Sprite_Sheets'Range loop
-            SDL.Free_Image (Unit_Sprite_Sheets (U));
-        end loop;
-
-        SDL.Free_Image (Arrows_Sprite_Sheet);
-        SDL.Free_Image (Spawn_Sprite_Sheet);
-        SDL.Free_Image (Tile_Sprite_Sheet);
-        SDL.Free_Image (Base_Sprite_Sheet);
-    end Finalize;
-
-    procedure Initialize is begin
-        for U in Unit_Sprite_Sheets'Range loop
-            Unit_Sprite_Sheets (U) := SDL.Load_Image (Paths.Unit_Sprites (U));
-        end loop;
-
-        Arrows_Sprite_Sheet := SDL.Load_Image (Paths.Arrow_Sprites);
-        Spawn_Sprite_Sheet := SDL.Load_Image (Paths.Spawn_Sprites);
-        Tile_Sprite_Sheet := SDL.Load_Image (Paths.Tile_Sprites);
-        Base_Sprite_Sheet := SDL.Load_Image (Paths.Base_Sprites);
-    end Initialize;
 end Games;
