@@ -18,8 +18,10 @@ package body Games is
 
         Delta_X : Natural := Where.Width / Reference.Width;
         Delta_Y : Natural := Where.Height / Reference.Height;
-        Offset_X : Natural := (Where.Width mod Reference.Width) / 2;
-        Offset_Y : Natural := (Where.Height mod Reference.Height) / 2;
+        Offset_X : Natural := Where.Left +
+            (Where.Width mod Reference.Width) / 2;
+        Offset_Y : Natural := Where.Top +
+            (Where.Height mod Reference.Height) / 2;
 
         function Determine_Distance (
             Which : in Actions.Action) return Integer is
@@ -74,7 +76,7 @@ package body Games is
             Rotation : in SDL.Angle) is
         begin
             SDL.Draw_Image (
-                Arrows_Sprite_Sheet,
+                Sprites.Arrow_Sprites,
                 Where,
                 Sprites.Arrow_Sprite_Clips (Which.Kind),
                 Rotation,
@@ -109,37 +111,12 @@ package body Games is
         Where : in SDL.Rectangle) is
         Delta_X : Natural := Where.Width / Which.Width;
         Delta_Y : Natural := Where.Height / Which.Height;
-        Offset_X : Natural := (Where.Width mod Which.Width) / 2;
-        Offset_Y : Natural := (Where.Height mod Which.Height) / 2;
-        procedure Render_Tile (
-            Which : in Tiles.Tile;
-            Where : in SDL.Rectangle) is
-        begin
-            if Which.Kind = Tiles.BASE then
-                SDL.Draw_Image (
-                    Sprites.Base_Sprites,
-                    Where,
-                    Sprites.Base_Sprite_Clips (Which.Occupant.Team));
-            else
-                SDL.Draw_Image (
-                    Sprites.Tile_Sprites,
-                    Where,
-                    Sprites.Tile_Sprite_Clips (Which.Kind));
-            end if;
-
-            if Which.Occupant.Unit /= Units.NONE and
-                Which.Occupant.Unit /= Units.UNKNOWN
-            then
-                SDL.Draw_Image (
-                    Sprites.Unit_Sprites (Which.Occupant.Unit),
-                    Where,
-                    Sprites.Unit_Sprite_Clips (Which.Occupant.Team));
-            end if;
-        end Render_Tile;
+        Offset_X : Natural := Where.Left + (Where.Width mod Which.Width) / 2;
+        Offset_Y : Natural := Where.Top + (Where.Height mod Which.Height) / 2;
     begin
         for Y in Positive range 1 .. Which.Height loop
             for X in Positive range 1 .. Which.Width loop
-                Render_Tile (
+                Draw_Tile (
                     Which => Boards.Get_Tile (
                         This => Which,
                         From => (X, Y)),
@@ -150,4 +127,61 @@ package body Games is
             end loop;
         end loop;
     end Draw_Board;
+
+    procedure Draw_Tile (
+        Which : in Tiles.Tile;
+        Where : in SDL.Rectangle) is
+    begin
+        if Which.Kind = Tiles.BASE then
+            SDL.Draw_Image (
+                Sprites.Base_Sprites,
+                Where,
+                Sprites.Unit_Sprite_Clips (Which.Occupant.Team));
+        else
+            SDL.Draw_Image (
+                Sprites.Tile_Sprites,
+                Where,
+                Sprites.Tile_Sprite_Clips (Which.Kind));
+        end if;
+
+        if Which.Occupant.Unit /= Units.NONE and
+            Which.Occupant.Unit /= Units.UNKNOWN
+        then
+            SDL.Draw_Image (
+                Sprites.Unit_Sprites (Which.Occupant.Unit),
+                Where,
+                Sprites.Unit_Sprite_Clips (Which.Occupant.Team));
+        end if;
+    end Draw_Tile;
+
+    function Get_Mouse_Coord (
+        Which : in Boards.Board;
+        Where : in SDL.Rectangle) return Coordinates.Coordinate is
+        Delta_X : Natural := Where.Width / Which.Width;
+        Delta_Y : Natural := Where.Height / Which.Height;
+        Offset_X : Natural := Where.Left + (Where.Width mod Which.Width) / 2;
+        Offset_Y : Natural := Where.Top + (Where.Height mod Which.Height) / 2;
+    begin
+        if not SDL.Within (Where, SDL.State.Mouse.Where) then
+            return (1, 1);
+        end if;
+
+        return ((SDL.State.Mouse.Where.X - Offset_X) / Delta_X + 1,
+                (SDL.State.Mouse.Where.Y - Offset_Y) / Delta_Y + 1);
+    end Get_Mouse_Coord;
+
+    function Get_Rectangle (
+        Which : in Boards.Board;
+        Where : in SDL.Rectangle;
+        Coord : in Coordinates.Coordinate) return SDL.Rectangle is
+        Delta_X : Natural := Where.Width / Which.Width;
+        Delta_Y : Natural := Where.Height / Which.Height;
+        Offset_X : Natural := Where.Left + (Where.Width mod Which.Width) / 2;
+        Offset_Y : Natural := Where.Top + (Where.Height mod Which.Height) / 2;
+    begin
+        return (
+            Left => Offset_X + Delta_X * (Coord.X - 1),
+            Top => Offset_Y + Delta_Y * (Coord.Y - 1),
+            Width => Delta_X, Height => Delta_Y);
+    end Get_Rectangle;
 end Games;

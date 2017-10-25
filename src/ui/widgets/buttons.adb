@@ -29,6 +29,33 @@ package body Buttons is
         end if;
     end Draw;
 
+    procedure Draw_Area (
+        This : Button;
+        Overlay_Area : SDL.Rectangle;
+        Inner_Sep : Natural) is
+        Correct_Clip : SDL.Rectangle;
+    begin
+        if SDL.Within (This.Area, SDL.State.Mouse.Where) then
+            if SDL.State.Mouse.Buttons (SDL.LEFT) then
+                Correct_Clip := Sprites.Button_Pressed_Clip;
+            else
+                Correct_Clip := Sprites.Button_Hover_Clip;
+            end if;
+        else
+            Correct_Clip := Sprites.Button_Normal_Clip;
+        end if;
+
+        SDL.Draw_Image (Sprites.Button_Sprites, This.Area, Correct_Clip);
+        if not SDL.Is_Null (This.Overlay) then
+            SDL.Draw_Image (This.Overlay, (
+                This.Area.Left + Inner_Sep,
+                This.Area.Top + Inner_Sep,
+                This.Area.Width - (2 * Inner_Sep),
+                This.Area.Height - (2 * Inner_Sep)),
+                Overlay_Area);
+        end if;
+    end Draw_Area;
+
     function Process_Event (
         This : in out Button;
         What : in SDL.Event)

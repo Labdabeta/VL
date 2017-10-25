@@ -8,7 +8,6 @@ package Sprites is
     procedure Finalize;
 
     Unit_Sprites : array (Units.Unit) of SDL.Image;
-    Glow_Sprites : SDL.Image;
     Base_Sprites : SDL.Image;
     function Unit_Sprite_Clips (Team : in Natural) return SDL.Rectangle;
 
@@ -25,4 +24,9 @@ package Sprites is
 
     Button_Sprites : SDL.Image;
     Button_Normal_Clip, Button_Hover_Clip, Button_Pressed_Clip : SDL.Rectangle;
+
+    Text_Box_Sprites : SDL.Image;
+    Text_Box_Enabled_Clip, Text_Box_Disabled_Clip : SDL.Rectangle;
+
+    Background_Sprite : SDL.Image;
 end Sprites;

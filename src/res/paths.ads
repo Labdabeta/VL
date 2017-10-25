@@ -17,4 +17,8 @@ package Paths is
     Spawn_Sprites : constant String := "../res/spawn.png";
     Font_TTF : constant String := "../res/font.ttf";
     Button_Sprites : constant String := "../res/button.png";
+    List_File : constant String := "../maps/list.txt";
+    Map_Prefix : constant String := "../maps/";
+    Text_Box_Sprites : constant String := "../res/boxes.png";
+    Background_Sprite : constant String := "../res/background.png";
 end Paths;

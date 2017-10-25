@@ -5,6 +5,9 @@ with Tiles;
 
 package Boards is
     type Board (Width, Height : Positive) is private;
+    type Board_Ptr is access Board;
+
+    procedure Free_Board (Which : in out Board_Ptr);
 
     function Create_Board (
         Width, Height : in Positive)

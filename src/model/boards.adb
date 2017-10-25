@@ -3,6 +3,7 @@ with Tiles; use Tiles;
 with Units; use Units;
 with Ada.Containers.Ordered_Sets;
 with Ada.Strings.Unbounded;
+with Ada.Unchecked_Deallocation;
 
 package body Boards is
     procedure Apply_Actions (
@@ -118,6 +119,13 @@ package body Boards is
     begin
         return New_Board;
     end Create_Board;
+
+    procedure Free_Board (Which : in out Board_Ptr) is
+        procedure Unchecked_Board_Deallocate is new
+            Ada.Unchecked_Deallocation (Board, Board_Ptr);
+    begin
+        Unchecked_Board_Deallocate (Which);
+    end Free_Board;
 
     function Get_Actions_From (
         This : in Board;
@@ -380,6 +388,12 @@ package body Boards is
         To : in Tiles.Tile) is
     begin
         This.Contents (From.X, From.Y) := To;
+        if This.Contents (From.X, From.Y).Kind /= BASE and
+            (This.Contents (From.X, From.Y).Occupant.Unit = Units.NONE or
+             This.Contents (From.X, From.Y).Occupant.Unit = Units.UNKNOWN)
+        then
+            This.Contents (From.X, From.Y).Occupant.Team := 0;
+        end if;
     end Set_Tile;
 
     function To_String (

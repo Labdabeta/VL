@@ -14,4 +14,10 @@ package Buttons is
         What : in SDL.Event)
         return Boolean;
     procedure Draw (This : Button);
+
+    --  Used to render a subsection of the overlay image
+    procedure Draw_Area (
+        This : Button;
+        Overlay_Area : SDL.Rectangle;
+        Inner_Sep : Natural);
 end Buttons;

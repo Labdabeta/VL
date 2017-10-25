@@ -1,8 +1,11 @@
 --  Maintains the state machine of screens
+with Boards;
+with Maps;
+
 package Screens is
     type Screen is (
         QUIT, NONE, MAIN_MENU, LOBBY, WAITING, HOSTING, PICKING, ALONE, PLAYING,
-        EDITING, HELP);
+        EDITING, HELP, NEW_MAP, GET_NAME);
     type Transition (To : Screen) is
         record
             case To is
@@ -10,6 +13,8 @@ package Screens is
                     Host : String (1 .. 120);
                     Name : String (1 .. 120);
                     Map_Name : String (1 .. 120);
+                when EDITING =>
+                    Document : Maps.Map;
                 when others => null;
             end case;
         end record;
