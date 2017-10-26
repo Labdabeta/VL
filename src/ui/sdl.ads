@@ -134,6 +134,15 @@ package SDL is
         VFlip : in Boolean := False;
         HFlip : in Boolean := False);
 
+    procedure Draw_Image_Centered (
+        Which : in Image;
+        Destination : in Rectangle;
+        Source : in Rectangle := (0, 0, 0, 0);
+        Rotation : in Angle := 0.0;
+        Center : in Coordinate := (0, 0);
+        VFlip : in Boolean := False;
+        HFlip : in Boolean := False);
+
     function Is_Null (Which : in Image) return Boolean;
 
 --------------------------------------------------------------------------------

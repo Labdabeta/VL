@@ -4,8 +4,18 @@ with Maps;
 
 package Screens is
     type Screen is (
-        QUIT, NONE, MAIN_MENU, LOBBY, WAITING, HOSTING, PICKING, ALONE, PLAYING,
-        EDITING, HELP, NEW_MAP, GET_NAME);
+        QUIT,  --  DONE
+        NONE,  --  DONE
+        MAIN_MENU,  -- DONE
+        LOBBY, -- NEXT! XXX
+        WAITING,
+        HOSTING,   -- DONE
+        PICKING,   -- DONE
+        ALONE, -- STUBBED FOR NOW!
+        PLAYING,
+        EDITING,  -- DONE
+        HELP,
+        NEW_MAP);  -- DONE
     type Transition (To : Screen) is
         record
             case To is
@@ -13,6 +23,7 @@ package Screens is
                     Host : String (1 .. 120);
                     Name : String (1 .. 120);
                     Map_Name : String (1 .. 120);
+                    Max_Players : Natural;
                 when EDITING =>
                     Document : Maps.Map;
                 when others => null;

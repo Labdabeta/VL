@@ -8,8 +8,9 @@ package body Text_Boxes is
 
     procedure Update (This : in out Text_Box);
 
-    function Create_Text_Box (
+    function Create (
         Hint : String;
+        Max_Length : Positive;
         Enabled : Boolean) return Text_Box is
         Result : Text_Box;
     begin
@@ -23,9 +24,13 @@ package body Text_Boxes is
         end if;
         Result.Hint_Length := Hint'Length;
         Result.Current := SDL.Null_Image;
+        Result.Max_Length := Max_Length;
+        if Max_Length > Result.Contents'Length then
+            Result.Max_Length := Result.Contents'Length;
+        end if;
         Update (Result);
         return Result;
-    end Create_Text_Box;
+    end Create;
 
     procedure Draw (This : Text_Box) is
     begin
@@ -49,13 +54,25 @@ package body Text_Boxes is
         end if;
     end Draw;
 
+    procedure Free (This : in out Text_Box) is begin
+        if not SDL.Is_Null (This.Current) then
+            SDL.Free_Image (This.Current);
+        end if;
+    end Free;
+
+    function Get_Content (This : Text_Box) return String is begin
+        return This.Contents (1 .. This.Length);
+    end Get_Content;
+
     procedure Process_Event (
         This : in out Text_Box;
         What : in SDL.Event) is
         procedure Append (What : Character) is begin
-            This.Length := This.Length + 1;
-            This.Contents (This.Length) := What;
-            Update (This);
+            if This.Length < This.Max_Length then
+                This.Length := This.Length + 1;
+                This.Contents (This.Length) := What;
+                Update (This);
+            end if;
         end Append;
 
         Shifted : String := "ABCDEFGHIJKLMNOPQRSTUVWXYZ)!@#$%^&*(" & ('"') &
@@ -110,6 +127,13 @@ package body Text_Boxes is
         This.Length := 0;
         Update (This);
     end Reset;
+
+    procedure Set_Area (
+        This : in out Text_Box;
+        Area : in SDL.Rectangle) is
+    begin
+        This.Area := Area;
+    end Set_Area;
 
     procedure Update (This : in out Text_Box) is
     begin

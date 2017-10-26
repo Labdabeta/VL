@@ -7,9 +7,11 @@ with Paths;
 with Screens;
 with SDL;
 with Strings;
+with Text_Boxes;
 
-package body Picking_Screen is
-    Prev, Next, Back, Create, Edit : Buttons.Button;
+package body Hosting_Screen is
+    Prev, Next, Cancel, Host : Buttons.Button;
+    Name : Text_Boxes.Text_Box;
     Title : SDL.Image;
     Current : Maps.Map;
     Board_Area, Title_Area : SDL.Rectangle;
@@ -21,9 +23,9 @@ package body Picking_Screen is
         Update_Layout;
         Buttons.Draw (Prev);
         Buttons.Draw (Next);
-        Buttons.Draw (Back);
-        Buttons.Draw (Create);
-        Buttons.Draw (Edit);
+        Buttons.Draw (Cancel);
+        Buttons.Draw (Host);
+        Text_Boxes.Draw (Name);
         if Current.Contents /= null then
             Games.Draw_Board (Current.Contents.all, Board_Area);
             SDL.Draw_Image_Centered (Title, Title_Area);
@@ -34,12 +36,12 @@ package body Picking_Screen is
         Maps.Free_Maps (Current);
         Buttons.Free_Overlay (Prev);
         Buttons.Free_Overlay (Next);
-        Buttons.Free_Overlay (Back);
-        Buttons.Free_Overlay (Create);
-        Buttons.Free_Overlay (Edit);
+        Buttons.Free_Overlay (Cancel);
+        Buttons.Free_Overlay (Host);
         if not SDL.Is_Null (Title) then
             SDL.Free_Image (Title);
         end if;
+        Text_Boxes.Free (Name);
     end Finalize;
 
     procedure Initialize is begin
@@ -48,12 +50,11 @@ package body Picking_Screen is
             SDL.Render_Text (Fonts.Main_Font, Strings.Prev, True));
         Next := Buttons.Create (
             SDL.Render_Text (Fonts.Main_Font, Strings.Next, True));
-        Back := Buttons.Create (
-            SDL.Render_Text (Fonts.Main_Font, Strings.Back, True));
-        Create := Buttons.Create (
-            SDL.Render_Text (Fonts.Main_Font, Strings.Create, True));
-        Edit := Buttons.Create (
-            SDL.Render_Text (Fonts.Main_Font, Strings.Edit, True));
+        Cancel := Buttons.Create (
+            SDL.Render_Text (Fonts.Main_Font, Strings.Cancel, True));
+        Host := Buttons.Create (
+            SDL.Render_Text (Fonts.Main_Font, Strings.Host, True));
+        Name := Text_Boxes.Create (Strings.Room_Name, 12, True);
     end Initialize;
 
     function Process_Event (What : in SDL.Event) return Screens.Transition is
@@ -65,16 +66,19 @@ package body Picking_Screen is
         elsif Buttons.Process_Event (Next, What) then
             Maps.Next (Current);
             Retitle;
-        elsif Buttons.Process_Event (Back, What) then
+        elsif Buttons.Process_Event (Cancel, What) then
             return (To => Screens.MAIN_MENU);
-        elsif Buttons.Process_Event (Create, What) then
-            return (To => Screens.NEW_MAP);
-        elsif Buttons.Process_Event (Edit, What) then
+        elsif Buttons.Process_Event (Host, What) then
             if Current.Contents /= null then
-                return (To => Screens.EDITING,
-                    Document => Current);
+                return (To => Screens.WAITING,
+                    Host => (others => ' '), -- special string indicating local
+                    Name => Text_Boxes.Get_Content (Name),
+                    Map_Name => Current.Name,
+                    Max_Players =>
+                        Boards.Get_Players (Current.Contents.all)'Length);
             end if;
         end if;
+        Text_Boxes.Process_Event (Name, What);
 
         return (To => Screens.NONE);
     end Process_Event;
@@ -95,6 +99,7 @@ package body Picking_Screen is
             Maps.Free_Maps (Current);
         end if;
         Current := Maps.Load_Maps;
+        Text_Boxes.Reset (Name);
         Retitle;
     end Update;
 
@@ -112,17 +117,12 @@ package body Picking_Screen is
             Top => H24 * 2,
             Width => W32 * 4,
             Height => H24 * 16));
-        Buttons.Set_Area (Back, (
+        Buttons.Set_Area (Cancel, (
             Left => W32 * 2,
             Top => H24 * 19,
             Width => W32 * 8,
             Height => H24 * 4));
-        Buttons.Set_Area (Create, (
-            Left => W32 * 12,
-            Top => H24 * 19,
-            Width => W32 * 8,
-            Height => H24 * 4));
-        Buttons.Set_Area (Edit, (
+        Buttons.Set_Area (Host, (
             Left => W32 * 22,
             Top => H24 * 19,
             Width => W32 * 8,
@@ -137,5 +137,10 @@ package body Picking_Screen is
             Top => 0,
             Width => W32 * 32,
             Height => H24 * 2);
+        Text_Boxes.Set_Area (Name, (
+            Left => W32 * 11,
+            Top => H24 * 20,
+            Width => W32 * 10,
+            Height => H24 * 2));
     end Update_Layout;
-end Picking_Screen;
+end Hosting_Screen;

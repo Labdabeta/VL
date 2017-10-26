@@ -261,6 +261,51 @@ package body SDL is
         end if;
     end Draw_Image;
 
+    procedure Draw_Image_Centered (
+        Which : in Image;
+        Destination : in Rectangle;
+        Source : in Rectangle := (0, 0, 0, 0);
+        Rotation : in Angle := 0.0;
+        Center : in Coordinate := (0, 0);
+        VFlip : in Boolean := False;
+        HFlip : in Boolean := False) is
+        True_Area : SDL.Rectangle;
+        True_Source : SDL.Rectangle := Source;
+    begin
+        if Source = (0, 0, 0, 0) then
+            True_Source := (0, 0, Which.Width, Which.Height);
+        end if;
+
+        --  Check if the image will even fit
+        if Destination.Width < True_Source.Width then
+            True_Area.Left := Destination.Left;
+        else
+            True_Area.Left := Destination.Left +
+                (Destination.Width / 2) -
+                (True_Source.Width / 2);
+        end if;
+
+        if Destination.Height < True_Source.Height then
+            True_Area.Top := Destination.Top;
+        else
+            True_Area.Top := Destination.Top +
+                (Destination.Height / 2) -
+                (True_Source.Height / 2);
+        end if;
+
+        True_Area.Width := True_Source.Width;
+        if True_Source.Width > Destination.Width then
+            True_Area.Width := True_Source.Width;
+        end if;
+
+        True_Area.Height := True_Source.Height;
+        if True_Source.Height > Destination.Height then
+            True_Area.Height := True_Source.Height;
+        end if;
+
+        Draw_Image (Which, True_Area, Source, Rotation, Center, VFlip, HFlip);
+    end Draw_Image_Centered;
+
     procedure End_Draw is begin
         if C_SDL_RenderPresent (The_Renderer) /= 0 then
             Ada.Text_IO.Put_Line ("RenderPresent: " & Value (C_SDL_GetError));

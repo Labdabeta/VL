@@ -2,6 +2,16 @@ with SDL;
 with Sprites;
 
 package body Buttons is
+    function Create (
+        Overlay : SDL.Image := SDL.Null_Image) return Button is
+        Result : Button := (
+            Area => (0, 0, 1, 1),
+            Overlay => Overlay,
+            Was_Pressed => False);
+    begin
+        return Result;
+    end Create;
+
     procedure Draw (This : Button) is
         Correct_Clip : SDL.Rectangle;
     begin
@@ -17,15 +27,7 @@ package body Buttons is
 
         SDL.Draw_Image (Sprites.Button_Sprites, This.Area, Correct_Clip);
         if not SDL.Is_Null (This.Overlay) then
-            SDL.Draw_Image (This.Overlay, (
-                Left => This.Area.Left +
-                    (This.Area.Width / 2) -
-                    (This.Overlay.Width / 2),
-                Top => This.Area.Top +
-                    (This.Area.Height / 2) -
-                    (This.Overlay.Height / 2),
-                Width => This.Overlay.Width,
-                Height => This.Overlay.Height));
+            SDL.Draw_Image_Centered (This.Overlay, This.Area);
         end if;
     end Draw;
 
@@ -56,6 +58,11 @@ package body Buttons is
         end if;
     end Draw_Area;
 
+    procedure Free_Overlay (This : in out Button) is
+    begin
+        SDL.Free_Image (This.Overlay);
+    end Free_Overlay;
+
     function Process_Event (
         This : in out Button;
         What : in SDL.Event)
@@ -79,4 +86,11 @@ package body Buttons is
 
         return False;
     end Process_Event;
+
+    procedure Set_Area (
+        This : in out Button;
+        Area : in SDL.Rectangle) is
+    begin
+        This.Area := Area;
+    end Set_Area;
 end Buttons;

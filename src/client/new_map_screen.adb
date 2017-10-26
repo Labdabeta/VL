@@ -23,45 +23,19 @@ package body New_Map_Screen is
         Buttons.Draw (Sub_Width);
         Buttons.Draw (Sub_Height);
         Text_Boxes.Draw (Name);
-        SDL.Draw_Image (Width, (
-            Left => Width_Area.Left +
-                (Width_Area.Width / 2) -
-                (Width.Width / 2),
-            Top => Width_Area.Top +
-                (Width_Area.Width / 2) -
-                (Width.Height / 2),
-            Width => Width.Width,
-            Height => Width.Height));
-        SDL.Draw_Image (Height, (
-            Left => Height_Area.Left +
-                (Height_Area.Width / 2) -
-                (Height.Width / 2),
-            Top => Height_Area.Top +
-                (Height_Area.Width / 2) -
-                (Height.Height / 2),
-            Width => Height.Width,
-            Height => Height.Height));
-        SDL.Draw_Image (X, (
-            Left => X_Area.Left +
-                (X_Area.Width / 2) -
-                (X.Width / 2),
-            Top => X_Area.Top +
-                (X_Area.Width / 2) -
-                (X.Height / 2),
-            Width => X.Width,
-            Height => X.Height));
+        SDL.Draw_Image_Centered (Width, Width_Area);
+        SDL.Draw_Image_Centered (Height, Height_Area);
+        SDL.Draw_Image_Centered (X, X_Area);
     end Draw;
 
     procedure Finalize is begin
-        if not SDL.Is_Null (Name.Current) then
-            SDL.Free_Image (Name.Current);
-        end if;
-        SDL.Free_Image (Back.Overlay);
-        SDL.Free_Image (Create.Overlay);
-        SDL.Free_Image (Add_Width.Overlay);
-        SDL.Free_Image (Add_Height.Overlay);
-        SDL.Free_Image (Sub_Width.Overlay);
-        SDL.Free_Image (Sub_Height.Overlay);
+        Text_Boxes.Free (Name);
+        Buttons.Free_Overlay (Back);
+        Buttons.Free_Overlay (Create);
+        Buttons.Free_Overlay (Add_Width);
+        Buttons.Free_Overlay (Add_Height);
+        Buttons.Free_Overlay (Sub_Width);
+        Buttons.Free_Overlay (Sub_Height);
         SDL.Free_Image (Width);
         SDL.Free_Image (Height);
         SDL.Free_Image (X);
@@ -70,21 +44,22 @@ package body New_Map_Screen is
     procedure Initialize is begin
         W := 1;
         H := 1;
-        Back.Overlay := SDL.Render_Text (Fonts.Main_Font, Strings.Back, True);
-        Create.Overlay := SDL.Render_Text (Fonts.Main_Font,
-            Strings.Create_Map, True);
-        Add_Width.Overlay := SDL.Render_Text (Fonts.Main_Font,
-            Strings.Add_Width, True);
-        Add_Height.Overlay := SDL.Render_Text (Fonts.Main_Font,
-            Strings.Add_Height, True);
-        Sub_Width.Overlay := SDL.Render_Text (Fonts.Main_Font,
-            Strings.Sub_Width, True);
-        Sub_Height.Overlay := SDL.Render_Text (Fonts.Main_Font,
-            Strings.Sub_Height, True);
+        Back := Buttons.Create (
+            SDL.Render_Text (Fonts.Main_Font, Strings.Back, True));
+        Create := Buttons.Create (
+            SDL.Render_Text (Fonts.Main_Font, Strings.Create_Map, True));
+        Add_Width := Buttons.Create (
+            SDL.Render_Text (Fonts.Main_Font, Strings.Add_Width, True));
+        Add_Height := Buttons.Create (
+            SDL.Render_Text (Fonts.Main_Font, Strings.Add_Height, True));
+        Sub_Width := Buttons.Create (
+            SDL.Render_Text (Fonts.Main_Font, Strings.Sub_Width, True));
+        Sub_Height := Buttons.Create (
+            SDL.Render_Text (Fonts.Main_Font, Strings.Sub_Height, True));
         Width := SDL.Render_Text (Fonts.Main_Font, Positive'Image (W), False);
         Height := SDL.Render_Text (Fonts.Main_Font, Positive'Image (H), False);
         X := SDL.Render_Text (Fonts.Main_Font, Strings.X, True);
-        Name := Text_Boxes.Create_Text_Box (Strings.Name_Hint, True);
+        Name := Text_Boxes.Create (Strings.Name_Hint, 34, True);
     end Initialize;
 
     function Process_Event (What : in SDL.Event) return Screens.Transition is
@@ -93,10 +68,10 @@ package body New_Map_Screen is
         if Buttons.Process_Event (Back, What) then
             return (To => Screens.PICKING);
         elsif Buttons.Process_Event (Create, What) then
-            if Name.Length > 0 then
+            if Text_Boxes.Get_Content (Name)'Length > 0 then
                 return (To => Screens.EDITING,
                     Document => Maps.Create_Map (
-                        Name.Contents (1 .. Name.Length), W, H));
+                        Text_Boxes.Get_Content (Name), W, H));
             end if;
         elsif Buttons.Process_Event (Add_Width, What) then
             W := W + 1;
@@ -140,41 +115,41 @@ package body New_Map_Screen is
         W32 : Integer := SDL.State.Window.Width / 32;
         H24 : Integer := SDL.State.Window.Height / 24;
     begin
-        Back.Area := (
+        Buttons.Set_Area (Back, (
             Left => W32 * 2,
             Top => H24 * 19,
             Width => W32 * 8,
-            Height => H24 * 4);
-        Create.Area := (
+            Height => H24 * 4));
+        Buttons.Set_Area (Create, (
             Left => W32 * 22,
             Top => H24 * 19,
             Width => W32 * 8,
-            Height => H24 * 4);
-        Add_Width.Area := (
+            Height => H24 * 4));
+        Buttons.Set_Area (Add_Width, (
             Left => W32 * 11,
             Top => H24 * 8,
             Width => W32 * 4,
-            Height => H24 * 4);
-        Add_Height.Area := (
+            Height => H24 * 4));
+        Buttons.Set_Area (Add_Height, (
             Left => W32 * 17,
             Top => H24 * 8,
             Width => W32 * 4,
-            Height => H24 * 4);
-        Sub_Width.Area := (
+            Height => H24 * 4));
+        Buttons.Set_Area (Sub_Width, (
             Left => W32 * 11,
             Top => H24 * 15,
             Width => W32 * 4,
-            Height => H24 * 4);
-        Sub_Height.Area := (
+            Height => H24 * 4));
+        Buttons.Set_Area (Sub_Height, (
             Left => W32 * 17,
             Top => H24 * 15,
             Width => W32 * 4,
-            Height => H24 * 4);
-        Name.Area := (
+            Height => H24 * 4));
+        Text_Boxes.Set_Area (Name, (
             Left => W32 * 2,
             Top => H24 * 5,
             Width => W32 * 28,
-            Height => H24 * 2);
+            Height => H24 * 2));
         Width_Area := (
             Left => W32 * 11,
             Top => H24 * 12,

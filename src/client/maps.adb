@@ -34,21 +34,27 @@ package body Maps is
     end Create_Map;
 
     procedure Free_Maps (Which : in out Map) is
-        First : Map_Ptr := Which.Prev.Next;
-        Current : Map_Ptr := First.Next;
-        Next : Map_Ptr;
-        procedure Free_Map is new Ada.Unchecked_Deallocation (
-            Map, Map_Ptr);
     begin
-        while Current /= First loop
-            Next := Current.Next;
+        if Which.Prev = null then
+            return;
+        end if;
+        declare
+            First : Map_Ptr := Which.Prev.Next;
+            Current : Map_Ptr := First.Next;
+            Next : Map_Ptr;
+            procedure Free_Map is new Ada.Unchecked_Deallocation (
+                Map, Map_Ptr);
+        begin
+            while Current /= First loop
+                Next := Current.Next;
+                Boards.Free_Board (Current.Contents);
+                Free_Map (Current);
+                Current := Next;
+            end loop;
+
             Boards.Free_Board (Current.Contents);
             Free_Map (Current);
-            Current := Next;
-        end loop;
-
-        Boards.Free_Board (Current.Contents);
-        Free_Map (Current);
+        end;
     end Free_Maps;
 
     function Load_Maps return Map is

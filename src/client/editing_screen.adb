@@ -54,29 +54,33 @@ package body Editing_Screen is
 
     procedure Finalize is
     begin
-        SDL.Free_Image (Save.Overlay);
-        SDL.Free_Image (Done.Overlay);
-        SDL.Free_Image (Add_Team.Overlay);
-        SDL.Free_Image (Sub_Team.Overlay);
+        Buttons.Free_Overlay (Save);
+        Buttons.Free_Overlay (Done);
+        Buttons.Free_Overlay (Add_Team);
+        Buttons.Free_Overlay (Sub_Team);
     end Finalize;
 
     procedure Initialize is
     begin
-        Save.Overlay := SDL.Render_Text (Fonts.Main_Font, Strings.Save, True);
-        Done.Overlay := SDL.Render_Text (Fonts.Main_Font, Strings.Done, True);
-        Vampire.Overlay := Sprites.Unit_Sprites (Units.VAMPIRE);
-        Leprechaun.Overlay := Sprites.Unit_Sprites (Units.LEPRECHAUN);
-        Human.Overlay := Sprites.Unit_Sprites (Units.HUMAN);
-        Zombie.Overlay := Sprites.Unit_Sprites (Units.ZOMBIE);
-        Fairy.Overlay := Sprites.Unit_Sprites (Units.FAIRY);
-        None.Overlay := SDL.Null_Image;
-        Base.Overlay := Sprites.Base_Sprites;
-        Pit.Overlay := Sprites.Tile_Sprites;
-        Floor.Overlay := Sprites.Tile_Sprites;
-        Producer.Overlay := Sprites.Tile_Sprites;
-        Impassable.Overlay := Sprites.Tile_Sprites;
-        Add_Team.Overlay := SDL.Render_Text (Fonts.Main_Font, "+", True);
-        Sub_Team.Overlay := SDL.Render_Text (Fonts.Main_Font, "-", True);
+        Save := Buttons.Create (
+            SDL.Render_Text (Fonts.Main_Font, Strings.Save, True));
+        Done := Buttons.Create (
+            SDL.Render_Text (Fonts.Main_Font, Strings.Done, True));
+        Vampire := Buttons.Create (Sprites.Unit_Sprites (Units.VAMPIRE));
+        Leprechaun := Buttons.Create (Sprites.Unit_Sprites (Units.LEPRECHAUN));
+        Human := Buttons.Create (Sprites.Unit_Sprites (Units.HUMAN));
+        Zombie := Buttons.Create (Sprites.Unit_Sprites (Units.ZOMBIE));
+        Fairy := Buttons.Create (Sprites.Unit_Sprites (Units.FAIRY));
+        None := Buttons.Create (SDL.Null_Image);
+        Base := Buttons.Create (Sprites.Base_Sprites);
+        Pit := Buttons.Create (Sprites.Tile_Sprites);
+        Floor := Buttons.Create (Sprites.Tile_Sprites);
+        Producer := Buttons.Create (Sprites.Tile_Sprites);
+        Impassable := Buttons.Create (Sprites.Tile_Sprites);
+        Add_Team := Buttons.Create (
+            SDL.Render_Text (Fonts.Main_Font, "+", True));
+        Sub_Team := Buttons.Create (
+            SDL.Render_Text (Fonts.Main_Font, "-", True));
         Tile := ((Units.NONE, 1), Tiles.FLOOR);
     end Initialize;
 
@@ -144,81 +148,81 @@ package body Editing_Screen is
         W32 : Integer := SDL.State.Window.Width / 32;
         H24 : Integer := SDL.State.Window.Height / 24;
     begin
-        Save.Area := (
+        Buttons.Set_Area (Save, (
             Left => W32 * 24,
             Top => H24 * 15,
             Width => W32 * 8,
-            Height => H24 * 4);
-        Done.Area := (
+            Height => H24 * 4));
+        Buttons.Set_Area (Done, (
             Left => W32 * 24,
             Top => H24 * 20,
             Width => W32 * 8,
-            Height => H24 * 4);
-        Vampire.Area := (
+            Height => H24 * 4));
+        Buttons.Set_Area (Vampire, (
             Left => W32 * 25,
             Top => H24,
             Width => W32 * 2,
-            Height => H24 * 2);
-        Leprechaun.Area := (
+            Height => H24 * 2));
+        Buttons.Set_Area (Leprechaun, (
             Left => W32 * 29,
             Top => H24,
             Width => W32 * 2,
-            Height => H24 * 2);
-        Human.Area := (
+            Height => H24 * 2));
+        Buttons.Set_Area (Human, (
             Left => W32 * 27,
             Top => H24,
             Width => W32 * 2,
-            Height => H24 * 2);
-        Zombie.Area := (
+            Height => H24 * 2));
+        Buttons.Set_Area (Zombie, (
             Left => W32 * 25,
             Top => H24 * 3,
             Width => W32 * 2,
-            Height => H24 * 2);
-        Fairy.Area := (
+            Height => H24 * 2));
+        Buttons.Set_Area (Fairy, (
             Left => W32 * 29,
             Top => H24 * 3,
             Width => W32 * 2,
-            Height => H24 * 2);
-        None.Area := (
+            Height => H24 * 2));
+        Buttons.Set_Area (None, (
             Left => W32 * 27,
             Top => H24 * 3,
             Width => W32 * 2,
-            Height => H24 * 2);
-        Base.Area := (
+            Height => H24 * 2));
+        Buttons.Set_Area (Base, (
             Left => W32 * 25,
             Top => H24 * 10,
             Width => W32 * 2,
-            Height => H24 * 2);
-        Pit.Area := (
+            Height => H24 * 2));
+        Buttons.Set_Area (Pit, (
             Left => W32 * 29,
             Top => H24 * 10,
             Width => W32 * 2,
-            Height => H24 * 2);
-        Floor.Area := (
+            Height => H24 * 2));
+        Buttons.Set_Area (Floor, (
             Left => W32 * 27,
             Top => H24 * 12,
             Width => W32 * 2,
-            Height => H24 * 2);
-        Producer.Area := (
+            Height => H24 * 2));
+        Buttons.Set_Area (Producer, (
             Left => W32 * 25,
             Top => H24 * 12,
             Width => W32 * 2,
-            Height => H24 * 2);
-        Impassable.Area := (
+            Height => H24 * 2));
+        Buttons.Set_Area (Impassable, (
             Left => W32 * 29,
             Top => H24 * 12,
             Width => W32 * 2,
-            Height => H24 * 2);
-        Add_Team.Area := (
+            Height => H24 * 2));
+        Buttons.Set_Area (Add_Team, (
             Left => W32 * 28,
             Top => H24 * 6,
             Width => W32 * 3,
-            Height => H24 * 3);
-        Sub_Team.Area := (
+            Height => H24 * 3));
+        Buttons.Set_Area (Sub_Team, (
             Left => W32 * 25,
             Top => H24 * 6,
             Width => W32 * 3,
-            Height => H24 * 3);
+            Height => H24 * 3));
         Board_Area := (
             Left => 0,
             Top => 0,

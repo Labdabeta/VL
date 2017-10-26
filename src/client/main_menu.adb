@@ -20,21 +20,27 @@ package body Main_Menu is
     end Draw;
 
     procedure Finalize is begin
-        SDL.Free_Image (Host.Overlay);
-        SDL.Free_Image (Join.Overlay);
-        SDL.Free_Image (Solo.Overlay);
-        SDL.Free_Image (Help.Overlay);
-        SDL.Free_Image (Edit.Overlay);
-        SDL.Free_Image (Quit.Overlay);
+        Buttons.Free_Overlay (Host);
+        Buttons.Free_Overlay (Join);
+        Buttons.Free_Overlay (Solo);
+        Buttons.Free_Overlay (Help);
+        Buttons.Free_Overlay (Edit);
+        Buttons.Free_Overlay (Quit);
     end Finalize;
 
     procedure Initialize is begin
-        Host.Overlay := SDL.Render_Text (Fonts.Main_Font, Strings.Host, True);
-        Join.Overlay := SDL.Render_Text (Fonts.Main_Font, Strings.Join, True);
-        Solo.Overlay := SDL.Render_Text (Fonts.Main_Font, Strings.Solo, True);
-        Help.Overlay := SDL.Render_Text (Fonts.Main_Font, Strings.Help, True);
-        Edit.Overlay := SDL.Render_Text (Fonts.Main_Font, Strings.Edit, True);
-        Quit.Overlay := SDL.Render_Text (Fonts.Main_Font, Strings.Quit, True);
+        Host := Buttons.Create (
+            SDL.Render_Text (Fonts.Main_Font, Strings.Host, True));
+        Join := Buttons.Create (
+            SDL.Render_Text (Fonts.Main_Font, Strings.Join, True));
+        Solo := Buttons.Create (
+            SDL.Render_Text (Fonts.Main_Font, Strings.Solo, True));
+        Help := Buttons.Create (
+            SDL.Render_Text (Fonts.Main_Font, Strings.Help, True));
+        Edit := Buttons.Create (
+            SDL.Render_Text (Fonts.Main_Font, Strings.Edit, True));
+        Quit := Buttons.Create (
+            SDL.Render_Text (Fonts.Main_Font, Strings.Quit, True));
     end Initialize;
 
     function Process_Event (What : in SDL.Event) return Screens.Transition is
@@ -60,36 +66,36 @@ package body Main_Menu is
         W32 : Integer := SDL.State.Window.Width / 32;
         H24 : Integer := SDL.State.Window.Height / 24;
     begin
-        Host.Area := (
+        Buttons.Set_Area (Host, (
             Left => W32 * 2,
             Top => H24 * 12,
             Width => W32 * 8,
-            Height => H24 * 4);
-        Join.Area := (
+            Height => H24 * 4));
+        Buttons.Set_Area (Join, (
             Left => W32 * 12,
             Top => H24 * 12,
             Width => W32 * 8,
-            Height => H24 * 4);
-        Solo.Area := (
+            Height => H24 * 4));
+        Buttons.Set_Area (Solo, (
             Left => W32 * 22,
             Top => H24 * 12,
             Width => W32 * 8,
-            Height => H24 * 4);
-        Help.Area := (
+            Height => H24 * 4));
+        Buttons.Set_Area (Help, (
             Left => W32 * 2,
             Top => H24 * 18,
             Width => W32 * 8,
-            Height => H24 * 4);
-        Edit.Area := (
+            Height => H24 * 4));
+        Buttons.Set_Area (Edit, (
             Left => W32 * 12,
             Top => H24 * 18,
             Width => W32 * 8,
-            Height => H24 * 4);
-        Quit.Area := (
+            Height => H24 * 4));
+        Buttons.Set_Area (Quit, (
             Left => W32 * 22,
             Top => H24 * 18,
             Width => W32 * 8,
-            Height => H24 * 4);
+            Height => H24 * 4));
     end Update_Buttons;
 
 end Main_Menu;
