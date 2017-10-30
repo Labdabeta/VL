@@ -1,3 +1,5 @@
+TODO: Make all size updates happen on update events.
+
 To add a game to the dynamic server:
 
 POST
@@ -17,4 +19,23 @@ name\tmap_name\tip\tmax_players
 or
 
 EOF\n
+
+or
+
+START\n
+
+
+
+Minimal GET request:
+
+GET /vl HTTP/1.1
+Host: www.labprogramming.net
+
+
+Minimal POST request:
+
+POST /vl?... HTTP/1.1
+Host: www.labprogramming.net
+
+
 

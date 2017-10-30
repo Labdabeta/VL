@@ -22,6 +22,7 @@ package body Sprites is
         SDL.Free_Image (Spawn_Sprites);
         SDL.Free_Image (Button_Sprites);
         SDL.Free_Image (Text_Box_Sprites);
+        SDL.Free_Image (Text_List_Sprites);
         SDL.Free_Image (Background_Sprite);
     end Finalize;
 
@@ -35,6 +36,7 @@ package body Sprites is
         Spawn_Sprites := SDL.Load_Image (Paths.Spawn_Sprites);
         Button_Sprites := SDL.Load_Image (Paths.Button_Sprites);
         Text_Box_Sprites := SDL.Load_Image (Paths.Text_Box_Sprites);
+        Text_List_Sprites := SDL.Load_Image (Paths.Text_List_Sprites);
         Background_Sprite := SDL.Load_Image (Paths.Background_Sprite);
 
         Button_Normal_Clip := (0, 0, 256, 128);
@@ -42,6 +44,9 @@ package body Sprites is
         Button_Pressed_Clip := (0, 256, 256, 128);
         Text_Box_Enabled_Clip := (0, 0, 512, 64);
         Text_Box_Disabled_Clip := (0, 64, 512, 64);
+        Text_List_Normal_Clip := (0, 0, 256, 128);
+        Text_List_Hover_Clip := (0, 128, 256, 128);
+        Text_List_Pressed_Clip := (0, 256, 256, 128);
     end Initialize;
 
     function Spawn_Sprite_Clips (Which : in Units.Unit) return SDL.Rectangle

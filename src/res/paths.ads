@@ -20,5 +20,6 @@ package Paths is
     List_File : constant String := "../maps/list.txt";
     Map_Prefix : constant String := "../maps/";
     Text_Box_Sprites : constant String := "../res/boxes.png";
+    Text_List_Sprites : constant String := "../res/lists.png";
     Background_Sprite : constant String := "../res/background.png";
 end Paths;

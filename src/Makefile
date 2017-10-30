@@ -20,9 +20,8 @@ run% : force_make
 	../bin/$*.out
 
 % : force_make %.gpr
-	gnatmake -P $*.gpr
-	# Maybe remove -f? it forces recompilations.
-	#cd $(BUILD_DIR); make $@
+	gprbuild -P $*.gpr
+	# gnatmake -P $*.gpr
 
 force_make:
 	true

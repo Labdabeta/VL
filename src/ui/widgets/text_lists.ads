@@ -1,3 +1,5 @@
+with SDL;
+
 package Text_Lists is
     --  The dimensions are characters and lines respectively, not pixels
     type Text_List (Width, Height : Positive) is private;
@@ -26,10 +28,13 @@ package Text_Lists is
         Data : in String);
 private
     type Image_Array is array (Positive range <>) of SDL.Image;
+    type Character_Display is array (Positive range <>, Positive range <>) of
+        Character;
+    type Boolean_Array is array (Positive range <>) of Boolean;
     type Text_List (Width, Height : Positive) is
         record
             Area : SDL.Rectangle;
             Overlays : Image_Array (1 .. Height);
-            Strings : array (1 .. Height) of String (1 .. Width);
+            Was_Pressed : Boolean_Array (1 .. Height);
         end record;
 end Text_Lists;

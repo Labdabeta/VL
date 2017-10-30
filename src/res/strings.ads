@@ -10,14 +10,16 @@ package Strings is
     Help : constant String := "Help";
     Host : constant String := "Host";
     Join : constant String := "Join";
+    More : constant String := "More";
     Name_Hint : constant String := "Enter Map Name";
     Next : constant String := ">";
     Prev : constant String := "<";
     Quit : constant String := "Quit";
+    Refresh : constant String := "Refresh";
+    Room_Name : constant String := "Room Name";
     Save : constant String := "Save";
     Solo : constant String := "Solo";
     Sub_Height : constant String := "-h";
     Sub_Width : constant String := "-w";
     X : constant String := "x";
-    Room_Name : constant String := "Room Name";
 end Strings;

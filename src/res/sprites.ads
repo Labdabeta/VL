@@ -28,5 +28,9 @@ package Sprites is
     Text_Box_Sprites : SDL.Image;
     Text_Box_Enabled_Clip, Text_Box_Disabled_Clip : SDL.Rectangle;
 
+    Text_List_Sprites : SDL.Image;
+    Text_List_Normal_Clip, Text_List_Hover_Clip, Text_List_Pressed_Clip :
+        SDL.Rectangle;
+
     Background_Sprite : SDL.Image;
 end Sprites;
