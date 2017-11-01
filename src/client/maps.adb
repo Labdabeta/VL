@@ -104,6 +104,7 @@ package body Maps is
                             New_Result.Name_Length := Document'Length;
                             New_Result.Prev := Result;
                             New_Result.Next := Result.Next;
+                            Result.Next.Prev := New_Result;
                             Result.Next := New_Result;
                             if Result.Prev = Result then
                                 Result.Prev := New_Result;

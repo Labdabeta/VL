@@ -58,6 +58,17 @@ package body Hosting_Screen is
     end Initialize;
 
     function Process_Event (What : in SDL.Event) return Screens.Transition is
+        function Pad_To (Text : in String; Length : in Natural) return String is
+            Result : String (1 .. Length) := (others => ' ');
+            Next_Spot : Positive := 1;
+        begin
+            for Index in Text'Range loop
+                Result (Next_Spot) := Text (Index);
+                Next_Spot := Next_Spot + 1;
+            end loop;
+
+            return Result;
+        end Pad_To;
     begin
         Update_Layout;
         if Buttons.Process_Event (Prev, What) then
@@ -72,8 +83,11 @@ package body Hosting_Screen is
             if Current.Contents /= null then
                 return (To => Screens.WAITING,
                     Host => (others => ' '), -- special string indicating local
-                    Name => Text_Boxes.Get_Content (Name),
-                    Map_Name => Current.Name,
+                    Name => Pad_To (Text_Boxes.Get_Content (Name), 120),
+                    Map_Name => Pad_To (
+                        Current.Name ( -- TODO: clean this up!
+                            Current.Name'First .. Current.Name'First +
+                            Current.Name_Length - 1), 120),
                     Max_Players =>
                         Boards.Get_Players (Current.Contents.all)'Length);
             end if;

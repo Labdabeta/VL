@@ -1,5 +1,8 @@
 TODO: Make all size updates happen on update events.
 
+TODO: Create a utility for non-blocking socket I/O to simplify things.
+      Most current hangs are on stuck sockets or bad timing.
+
 To add a game to the dynamic server:
 
 POST

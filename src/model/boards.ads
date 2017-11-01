@@ -59,9 +59,6 @@ package Boards is
         Team : in Positive)
         return Board;
 
-    --  TODO: Add localization of actions. UI can then allow you to hot-switch
-    --  between "projected last turn" and current turn. Just render the old
-    --  actions and any unit with no action is rendered as it is "now".
     function Localize_Actions (
         This : in Board;
         Team : in Positive;

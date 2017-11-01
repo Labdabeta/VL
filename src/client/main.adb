@@ -9,6 +9,7 @@ with New_Map_Screen;
 with Editing_Screen;
 with Hosting_Screen;
 with Lobby_Screen;
+with Waiting_Screen;
 
 with Ada.Real_Time; use Ada.Real_Time;
 with Ada.Text_IO; use Ada.Text_IO;
@@ -30,6 +31,7 @@ begin
     Editing_Screen.Initialize;
     Hosting_Screen.Initialize;
     Lobby_Screen.Initialize;
+    Waiting_Screen.Initialize;
 
     Frame_Loop : loop
         Next := Clock + One_Frame;
@@ -67,6 +69,10 @@ begin
                         Screens.Apply_Transition (
                             Lobby_Screen.Process_Event (E),
                             Current);
+                    when Screens.WAITING =>
+                        Screens.Apply_Transition (
+                            Waiting_Screen.Process_Event (E),
+                            Current);
                     when others => exit Frame_Loop;
                 end case;
             end;
@@ -83,6 +89,7 @@ begin
             when Screens.EDITING => Editing_Screen.Draw;
             when Screens.HOSTING => Hosting_Screen.Draw;
             when Screens.LOBBY => Lobby_Screen.Draw;
+            when Screens.WAITING => Waiting_Screen.Draw;
             when others => exit Frame_Loop;
         end case;
         End_Draw;
@@ -92,6 +99,7 @@ begin
         end if;
     end loop Frame_Loop;
 
+    Waiting_Screen.Finalize;
     Lobby_Screen.Finalize;
     Hosting_Screen.Finalize;
     Editing_Screen.Finalize;

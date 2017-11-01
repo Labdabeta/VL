@@ -1,3 +1,5 @@
+with Boards;
+
 package Lobby is
     type Lobby_Element is
         record
@@ -16,6 +18,8 @@ package Lobby is
 
     function Post_Lobby (Element : Lobby_Element)
         return Positive;
+
+    function Read_Board (Which : Lobby_Element) return Boards.Board;
 
     procedure Remove_Post (Which : Positive);
 end Lobby;

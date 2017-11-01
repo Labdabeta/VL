@@ -1,9 +1,14 @@
 with GNAT.Sockets; use GNAT.Sockets;
 with Ada.Containers.Vectors;
 
+with Paths;
+
 with Ada.Unchecked_Deallocation;
 with Ada.Strings.Unbounded;
 with HTTP_Utils;
+
+with Ada.Text_IO;
+with Ada.Text_IO.Text_Streams;
 
 package body Lobby is
     function Webify (What : String) return String;
@@ -31,6 +36,9 @@ package body Lobby is
         return Positive is
         Address : Sock_Addr_Type;
         Result : Socket_Type;
+        Player_Count_String : String := Positive'Image (Element.Max_Players);
+        PCS : String := Player_Count_String (
+            Player_Count_String'First + 1 .. Player_Count_String'Last);
     begin
         Address.Addr := Addresses (Get_Host_By_Name (Lobby_Address), 1);
         Address.Port := HTTP_Port;
@@ -39,13 +47,14 @@ package body Lobby is
         String'Write (Stream (Result), Post_Start &
             "name=" & Webify (Element.Name) &
             "&map_name=" & Webify (Element.Map_Name) &
-            "&max_players=" & Positive'Image (Element.Max_Players) & Post_End);
+            "&max_players=" & PCS & Post_End);
 
         declare
             Request_Body : HTTP_Utils.String_List :=
                 HTTP_Utils.Extract_Request (Stream (Result));
         begin
             Shutdown_Socket (Result);
+
             return Positive'Value (
                 Ada.Strings.Unbounded.To_String (
                     Request_Body (Request_Body'First)));
@@ -107,6 +116,26 @@ package body Lobby is
         end;
     end Query_Lobby;
 
+    function Read_Board (Which : Lobby_Element) return Boards.Board is
+        File : Ada.Text_IO.File_Type;
+        Real_Length : Positive := 1;
+    begin
+        while Which.Map_Name (Real_Length) /= ' ' and
+            Real_Length < Which.Map_Name'Last
+        loop
+            Real_Length := Real_Length + 1;
+        end loop;
+        Ada.Text_IO.Open (File, Ada.Text_IO.In_File,
+            Paths.Map_Prefix & Which.Map_Name (1 .. Real_Length - 1) & ".vl");
+        declare
+            Result : Boards.Board := Boards.Board'Input (
+                Ada.Text_IO.Text_Streams.Stream (File));
+        begin
+            Ada.Text_IO.Close (File);
+            return Result;
+        end;
+    end Read_Board;
+
     procedure Remove_Post (Which : Positive) is
         Address : Sock_Addr_Type;
         Result : Socket_Type;
@@ -129,7 +158,7 @@ package body Lobby is
         for I in What'Range loop
             if
                 (What (I) <= 'Z' and What (I) >= 'A') or
-                (What (I) <= 'z' and What (I) >= 'z') or
+                (What (I) <= 'z' and What (I) >= 'a') or
                 (What (I) <= '9' and What (I) >= '0')
             then
                 Index := Index + 1;

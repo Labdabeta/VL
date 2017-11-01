@@ -1,5 +1,7 @@
 with GNAT.Sockets;
-with Ada.Strings.Unbounded;
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+
+with Ada.Text_IO;
 
 package body HTTP_Utils is
     function Char_To_Hex (What : Character) return Natural is
@@ -30,6 +32,10 @@ package body HTTP_Utils is
         Query : Character;
         Line_Length : Natural;
         Empty_List : String_List (1 .. 0);
+        Key : Unbounded_String := To_Unbounded_String ("");
+        Value : Unbounded_String := To_Unbounded_String ("");
+        Is_Value : Boolean;
+        Body_Length : Natural := 0;
 
         function Line_Split (
             Text : String;
@@ -40,7 +46,7 @@ package body HTTP_Utils is
         begin
             while Sub_Length < Text'Last loop
                 if Text (Sub_Length) = ASCII.LF then
-                    Next_Line (1) := Ada.Strings.Unbounded.To_Unbounded_String (
+                    Next_Line (1) := To_Unbounded_String (
                         Text (Text'First .. Sub_Length - 1));
                     return Line_Split (
                         Text (Sub_Length + 1 .. Text'Last),
@@ -49,13 +55,14 @@ package body HTTP_Utils is
                 Sub_Length := Sub_Length + 1;
             end loop;
 
-            return Current;
+            Next_Line (1) := To_Unbounded_String (Text);
+            return Current & Next_Line;
         end Line_Split;
 
-        function Read_Chunks return Ada.Strings.Unbounded.Unbounded_String is
+        function Read_Chunks return Unbounded_String is
             Chunk_Length : Natural := 0;
-            Current : Ada.Strings.Unbounded.Unbounded_String :=
-                Ada.Strings.Unbounded.To_Unbounded_String ("");
+            Current : Unbounded_String :=
+                To_Unbounded_String ("");
         begin
             loop
                 loop
@@ -73,7 +80,7 @@ package body HTTP_Utils is
                     Current_Chunk : String (1 .. Chunk_Length);
                 begin
                     String'Read (Data, Current_Chunk);
-                    Ada.Strings.Unbounded.Append (Current, Current_Chunk);
+                    Append (Current, Current_Chunk);
 
                     --  Read the terminating CR LF
                     Character'Read (Data, Query);
@@ -88,14 +95,45 @@ package body HTTP_Utils is
         --  Read until empty line
         loop
             Line_Length := 0;
-            while Character'Input (Data) /= ASCII.CR loop
+            Is_Value := False;
+            Key := To_Unbounded_String ("");
+            Value := To_Unbounded_String ("");
+            Read_Line : loop
+                Character'Read (Data, Query);
+                if Query = ASCII.CR then
+                    Character'Read (Data, Query); -- Discard the newline
+                    exit Read_Line;
+                end if;
                 Line_Length := Line_Length + 1;
-            end loop;
-            Character'Read (Data, Query); --  Extract the LF
+
+                if Query = ':' and not Is_Value then
+                    Is_Value := True;
+                    Character'Read (Data, Query); -- Discard the space
+                else
+                    if Is_Value then
+                        Append (Value, Query);
+                    else
+                        Append (Key, Query);
+                    end if;
+                end if;
+            end loop Read_Line;
             exit when Line_Length = 0;
+
+            if Key = "Content-Length" then
+                Body_Length := Integer'Value (To_String (Value));
+            end if;
         end loop;
 
-        return Line_Split (
-            Ada.Strings.Unbounded.To_String (Read_Chunks), Empty_List);
+        if Body_Length = 0 then
+            return Line_Split (
+                To_String (Read_Chunks), Empty_List);
+        else
+            declare
+                Contents : String (1 .. Body_Length);
+            begin
+                String'Read (Data, Contents);
+                return Line_Split (Contents, Empty_List);
+            end;
+        end if;
     end Extract_Request;
 end HTTP_Utils;

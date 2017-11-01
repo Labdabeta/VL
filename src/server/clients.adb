@@ -1,128 +1,123 @@
-with Boards;
 with Actions;
-with Servers;
+with Boards;
+with Constants;
+with Lobby;
+with VL;
 with GNAT.Sockets; use GNAT.Sockets;
 
 package body Clients is
+    --  Poll at 10hz
+    Poll_Delay : constant Duration := 0.1;
 
-    task body Client_Reader is
-        Server : Servers.Server;
-        Sock : Socket_Type;
+    task body Client is
         Connection : Stream_Access;
-        We : Natural;
-        W, H, PC : Positive;
-        Read_Selection : Selector;
-        Client_Set : Socket_Set_Type;
+        Server_Socket : Socket_Type;
+        Server_Address : Sock_Addr_Type;
+        Read_Selector : Selector_Type;
+        Server_Set : Socket_Set_Type;
         Empty_Set : Socket_Set_Type;
         Read_Status : Selector_Status;
-        Read_Delay : constant Duration := 0.1; -- poll at 10Hz
+        Team : Natural;
+        Created : Boolean := False;
+        Temp_Lobby : Lobby.Lobby_Element;
+        Is_Killed : Boolean := False;
+        Non_Blocking_Request : Request_Type (Non_Blocking_IO) := (
+                Name => Non_Blocking_IO,
+                Enabled => True);
+        Game_Over : Boolean;
     begin
-        accept Create (
-            Reference : in out Servers.Server;
-            Socket : in GNAT.Sockets.Socket_Type;
-            Us : in Natural) do
-            Server := Reference;
-            Sock := Socket;
-            We := Us;
-        end Create;
+        select
+            accept Initialize (The_Lobby : in Lobby.Lobby_Element) do
+                Temp_Lobby := The_Lobby;
+            end Initialize;
+        or
+            accept Kill do
+                Is_Killed := True;
+            end Kill;
+        end select;
 
-        Connection := Stream (Sock);
+        if not Is_Killed then
+            Server_Address.Addr := Addresses (
+                Get_Host_By_Name (Temp_Lobby.Address), 1);
+            Server_Address.Port := Constants.VL_Port;
 
-        Server.Get_Dimensions (W, H, PC);
+            Create_Socket (Server_Socket);
+            Set_Socket_Option (
+                Server_Socket, Socket_Level, (Reuse_Address, True));
 
-        Empty (Client_Set);
-        Empty (Empty_Set);
-        Set (Client_Set, Sock);
-        Create_Selector (Read_Selection);
-        loop
-            select
-                accept Kill do
-                    Server.Quit (We);
-                    Shutdown_Socket (Sock);
-                    return;
-                end Kill;
-            else
-                Check_Selector (Read_Selection,
-                    Client_Set, Empty_Set,
-                    Read_Status, Read_Delay);
-                if Read_Status = Completed then
-                    declare
-                        Message_Type : Character;
-                    begin
-                        Character'Read (Connection, Message_Type);
-                        case Message_Type is
-                            when 'X' =>
-                                Server.Quit (We);
-                            when 'C' =>
-                                Server.Commit (
-                                    Actions.Action_Array'Input (Connection),
-                                    We);
-                            when 'U' =>
-                                Server.Uncommit (We);
-                        end case;
-                    end;
-                end if;
-        end loop;
-        Close_Selector (Read_Selection);
-    end Client_Reader;
+            Connect_Socket (Server_Socket, Server_Address);
 
-    task body Client_Writer is
-        Server : Servers.Server;
-        Sock : Socket_Type;
-        Connection : Stream_Access;
-        Us : Natural;
-        W, H, PC : Positive;
+            Connection := Stream (Server_Socket);
+            Control_Socket (Server_Socket, Non_Blocking_Request);
 
-        function To_Char (Act : Player_Activity) return Character is begin
-            case Act is
-                when EMPTY => return "E";
-                when ACTIVE => return "A";
-                when COMMITTED => return "C";
-                when DISCONNECTED => return "D";
-                when QUIT => return "Q";
-                when SELF => return "S";
-            end Act;
-        end To_Char;
-    begin
-        accept Create (
-            Reference : in out Servers.Server;
-            Socket : in GNAT.Sockets.Socket_Type;
-            Us : out Natural) do
-            Server := Reference;
-            Sock := Socket;
-            Server.Connect (Us);
-        end Create;
+            Empty (Empty_Set);
+            Empty (Server_Set);
+            Set (Server_Set, Server_Socket);
+            Create_Selector (Read_Selector);
 
-        Connection := Stream (Sock);
+            Natural'Read (Connection, Team);
+            Game_Over := False;
+            while not Game_Over loop
+                select
+                    accept Commit (Which : in Actions.Action_Array) do
+                        Character'Write (Connection, 'C');
+                        Actions.Action_Array'Output (Connection, Which);
+                    end Commit;
+                or
+                    accept Uncommit do
+                        Character'Write (Connection, 'U');
+                    end Uncommit;
+                or
+                    accept Kill do
+                        Shutdown_Socket (Server_Socket);
+                        Game_Over := True;
+                    end Kill;
+                else
+                    Check_Selector (Read_Selector,
+                        Server_Set, Empty_Set,
+                        Read_Status, Poll_Delay);
+                    if Read_Status = Completed then
+                        declare
+                            New_Board : Boards.Board :=
+                                Boards.Board'Input (Connection);
+                            New_Actions : Actions.Action_Array :=
+                                Actions.Action_Array'Input (Connection);
+                            Num_Players : Natural := Natural'Input (Connection);
+                            New_State : VL.VL_State (
+                                Width => New_Board.Width,
+                                Height => New_Board.Height,
+                                Num_Players => Num_Players,
+                                Num_Actions => New_Actions'Length);
+                            Query : Character;
+                        begin
+                            New_State.Board := New_Board;
+                            New_State.Last_Actions := New_Actions;
+                            for I in New_State.Players'Range loop
+                                New_State.Players (I).Team :=
+                                    Natural'Input (Connection);
+                                Character'Read (Connection, Query);
+                                case Query is
+                                    when 'E' => New_State.Players (I).Status :=
+                                        VL.EMPTY;
+                                    when 'A' => New_State.Players (I).Status :=
+                                        VL.ACTIVE;
+                                    when 'C' => New_State.Players (I).Status :=
+                                        VL.COMMITTED;
+                                    when 'Q' => New_State.Players (I).Status :=
+                                        VL.QUIT;
+                                    when others =>
+                                        New_State.Players (I).Status := VL.QUIT;
+                                end case;
+                            end loop;
 
-        Server.Get_Dimensions (W, H, PC);
-
-        declare
-            Board : Boards.Board (W, H);
-            Statuses : Player_Status_Array (1 .. PC);
-        begin
-            loop
-                Server.Query (Us, Board, Statuses);
-                for Index in Statuses'Range loop
-                    if Statuses (Index).Team = Us then
-                        if Statuses (Index).Activity = QUIT or
-                            Statuses (Index).Activity = DISCONNECTED
-                        then
-                            return;
-                        end if;
+                            if Boards.Get_Winner (New_State.Board) /= 0 then
+                                Game_Over := True;
+                            end if;
+                            Game.Set (New_State);
+                        end;
                     end if;
-                end loop;
-
-                Boards.Board'Output (Connection, Board);
-                for Index in Statuses'Range loop
-                    Natural'Write (Connection, Statuses (Index).Team);
-                    Character'Write (Connection,
-                        To_Char (Statuses (Index).Activity));
-                end loop;
-
-                Server.Wait_For_Change;
+                end select;
             end loop;
-        end;
-    end Client_Writer;
-
+        end if;
+    end Client;
 end Clients;
