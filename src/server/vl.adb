@@ -137,6 +137,7 @@ package body VL is
                 Current_Actions (Index) := null;
             end loop;
             Created := True;
+            Destroyed := False;
         end Create;
 
         entry Destroy when Created and not Destroyed is
@@ -325,7 +326,7 @@ package body VL is
             or
                 accept Kill do
                     Is_Killed := True;
-                end Kill;
+                end Kill; -- SOMEHOW STUCK HERE AFTER HOST+BACK 2x THEN QUIT
             end select;
 
             if Is_Killed then

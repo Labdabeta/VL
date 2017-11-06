@@ -168,7 +168,6 @@ package body Servers is
         select
             accept Initialize (The_Lobby : in Lobby.Lobby_Element) do
                 Temp_Lobby := The_Lobby;
-                Game.Join (Team);
             end Initialize;
         or
             accept Kill do
@@ -177,6 +176,7 @@ package body Servers is
         end select;
 
         if not Is_Killed then
+            Game.Join (Team);
             Lobby_Id := Lobby.Post_Lobby (Temp_Lobby);
             Local_Address.Addr := Addresses (Get_Host_By_Name (Host_Name), 1);
             Local_Address.Port := Constants.VL_Port;

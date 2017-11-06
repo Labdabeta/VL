@@ -55,7 +55,8 @@ package body HTTP_Utils is
                 Sub_Length := Sub_Length + 1;
             end loop;
 
-            Next_Line (1) := To_Unbounded_String (Text);
+            Next_Line (1) := To_Unbounded_String (
+                Text (Text'First .. Text'Last - 1));
             return Current & Next_Line;
         end Line_Split;
 
@@ -101,7 +102,7 @@ package body HTTP_Utils is
             Read_Line : loop
                 Character'Read (Data, Query);
                 if Query = ASCII.CR then
-                    Character'Read (Data, Query); -- Discard the newline
+                    Character'Read (Data, Query); -- Discard the LF
                     exit Read_Line;
                 end if;
                 Line_Length := Line_Length + 1;

@@ -70,6 +70,10 @@ package body Lobby is
 
         procedure Process_Line (What : String) is
         begin
+            if Started and (What'Length = 3 and then (What = "EOF")) then
+                Started := False;
+            end if;
+
             if Started then
                 declare
                     New_Element : Lobby_Element := (
@@ -139,13 +143,23 @@ package body Lobby is
     procedure Remove_Post (Which : Positive) is
         Address : Sock_Addr_Type;
         Result : Socket_Type;
+        Id_String : String := Positive'Image (Which);
+        IDS : String := Id_String (Id_String'First + 1 .. Id_String'Last);
     begin
         Address.Addr := Addresses (Get_Host_By_Name (Lobby_Address), 1);
         Address.Port := HTTP_Port;
         Create_Socket (Result);
         Connect_Socket (Result, Address);
         String'Write (Stream (Result), Delete_Post_Start &
-            "id=" & Positive'Image (Which) & Post_End);
+            "id=" & IDS & Post_End);
+        declare
+            Response : HTTP_Utils.String_List := HTTP_Utils.Extract_Request (
+                Stream (Result));
+            pragma Unreferenced (Response);
+        begin
+            null;
+        end;
+
         Shutdown_Socket (Result);
     end Remove_Post;
 
