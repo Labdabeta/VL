@@ -10,6 +10,8 @@ with Games;
 
 with Ada.Unchecked_Deallocation;
 
+with Ada.Text_IO;
+
 package body Waiting_Screen is
     Back : Buttons.Button;
     Map : Boards.Board_Ptr;
@@ -72,7 +74,8 @@ package body Waiting_Screen is
 
     procedure Refresh is
     begin
-        null;
+        Ada.Text_IO.Put_Line ("Refresh");
+        Notifier.Clear;
     end Refresh;
 
     procedure Update (

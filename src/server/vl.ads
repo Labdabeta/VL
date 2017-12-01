@@ -23,6 +23,7 @@ package VL is
 
     protected type VL_Notifier is
         entry Query (Changed : out Boolean);
+        entry Clear;
         entry Get_Dimensions (
             Width : out Positive;
             Height : out Positive;

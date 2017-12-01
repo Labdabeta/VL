@@ -18,6 +18,10 @@ package body VL is
             Changed := Has_Changed;
         end Query;
 
+        entry Clear when Has_Changed is begin
+            Has_Changed := False;
+        end Clear;
+
         entry Get_Dimensions (
             Width : out Positive;
             Height : out Positive;
