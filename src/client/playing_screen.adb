@@ -8,13 +8,10 @@ with Strings;
 with VL;
 with Games;
 
-with Ada.Unchecked_Deallocation;
-
-package body Waiting_Screen is
-    Back : Buttons.Button;
+package body Playing_Screen is
+    Back, Submit : Buttons.Button;
     Map : Boards.Board_Ptr;
-    Title : SDL.Image;
-    Title_Area, Map_Area : SDL.Rectangle;
+    Map_Area : SDL.Rectangle;
 
     Notifier : aliased VL.VL_Notifier;
 
@@ -33,18 +30,12 @@ package body Waiting_Screen is
         if Map /= null then
             Games.Draw_Board (Map.all, Map_Area);
         end if;
-        if not SDL.Is_Null (Title) then
-            SDL.Draw_Image_Centered (Title, Title_Area);
-        end if;
-        --  TODO: draw player states
+        -- TODO: draw player states/actions/etc
     end Draw;
 
     procedure Finalize is begin
-        VL.VL_Manager.Kill;
         Buttons.Free_Overlay (Back);
-        if not SDL.Is_Null (Title) then
-            SDL.Free_Image (Title);
-        end if;
+        Buttons.Free_Overlay (Submit);
         if Map /= null then
             Boards.Free_Board (Map);
         end if;
@@ -54,8 +45,6 @@ package body Waiting_Screen is
         Back := Buttons.Create (
             SDL.Render_Text (Fonts.Main_Font, Strings.Back, True));
         Map := null;
-        Title := SDL.Null_Image;
-        Title_Area := (0, 0, 1, 1);
         Map_Area := (0, 0, 1, 1);
     end Initialize;
 
@@ -67,6 +56,8 @@ package body Waiting_Screen is
             return (To => Screens.MAIN_MENU);
         end if;
 
+        -- TODO: submit/click
+
         return (To => Screens.NONE);
     end Process_Event;
 
@@ -75,18 +66,8 @@ package body Waiting_Screen is
         null;
     end Refresh;
 
-    procedure Update (
-        Host : String;
-        Name : String;
-        Map_Name : String;
-        Max_Players : Natural) is
+    procedure Update is
     begin
-        if Host (Host'First) = ' ' then
-            VL.VL_Manager.Host (Which => (Name, Map_Name, Host, Max_Players));
-        else
-            VL.VL_Manager.Join (Which => (Name, Map_Name, Host, Max_Players));
-        end if;
-
         VL.VL_Manager.Set_Notifier (Notifier'Access);
     end Update;
 
@@ -94,15 +75,20 @@ package body Waiting_Screen is
         W32 : Integer := SDL.State.Window.Width / 32;
         H24 : Integer := SDL.State.Window.Height / 24;
     begin
+        Buttons.Set_Area (Submit, (
+            Left => W32 * 24,
+            Top => H24 * 16,
+            Width => W32 * 8,
+            Height => H24 * 4));
         Buttons.Set_Area (Back, (
-            Left => W32 * 2,
-            Top => H24 * 19,
+            Left => W32 * 24,
+            Top => H24 * 20,
             Width => W32 * 8,
             Height => H24 * 4));
         Map_Area := (
-            Left => W32 * 3,
-            Top => H24 * 2,
-            Width => W32 * 26,
-            Height => H24 * 16);
+            Left => 0,
+            Top => 0,
+            Width => W32 * 24,
+            Height => H24 * 24);
     end Update_Layout;
-end Waiting_Screen;
+end Playing_Screen;

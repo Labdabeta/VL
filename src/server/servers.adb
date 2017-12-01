@@ -41,6 +41,8 @@ package body Servers is
             accept Kill do
                 Killed := True;
             end Kill;
+        or
+            terminate;
         end select;
 
         while not Killed loop
@@ -123,6 +125,8 @@ package body Servers is
             accept Kill do
                 Killed := True;
             end Kill;
+        or
+            terminate;
         end select;
 
         if not Killed then
@@ -155,6 +159,7 @@ package body Servers is
         Server_Socket : Socket_Type;
         Local_Address : Sock_Addr_Type;
         Accept_Selector : Selector_Type;
+        Empty_Set : Socket_Set_Type;
         Server_Set : Socket_Set_Type;
         Accept_Status : Selector_Status;
         Team : Natural;
@@ -189,6 +194,7 @@ package body Servers is
             Bind_Socket (Server_Socket, Local_Address);
             Listen_Socket (Server_Socket);
 
+            Empty (Empty_Set);
             Empty (Server_Set);
             Set (Server_Set, Server_Socket);
             Create_Selector (Accept_Selector);
@@ -196,15 +202,11 @@ package body Servers is
                 loop
                     select
                         accept Kill do
-                            for I in Positive range 1 .. Index - 1 loop
-                                Readers (I).Kill;
-                                Writers (I).Kill;
-                            end loop;
                             Is_Killed := True;
                         end Kill;
                     else
                         Check_Selector (Accept_Selector,
-                            Server_Set, Server_Set, Accept_Status, Poll_Delay);
+                            Server_Set, Empty_Set, Accept_Status, Poll_Delay);
                         if Accept_Status = Completed then
                             declare
                                 Client_Socket : Socket_Type;
@@ -245,13 +247,15 @@ package body Servers is
                     end Kill;
                 end select;
             end loop;
-            for Index in Readers'Range loop
-                Readers (Index).Kill;
-            end loop;
-
-            for Index in Writers'Range loop
-                Writers (Index).Kill;
-            end loop;
         end if;
+
+        --  Kill the tasks even if we never started them!
+        for Index in Readers'Range loop
+            Readers (Index).Kill;
+        end loop;
+
+        for Index in Writers'Range loop
+            Writers (Index).Kill;
+        end loop;
     end Server;
 end Servers;

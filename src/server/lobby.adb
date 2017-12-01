@@ -150,6 +150,7 @@ package body Lobby is
         Address.Port := HTTP_Port;
         Create_Socket (Result);
         Connect_Socket (Result, Address);
+        Ada.Text_IO.Put_Line (Delete_Post_Start & "id=" & IDS & Post_End);
         String'Write (Stream (Result), Delete_Post_Start &
             "id=" & IDS & Post_End);
         declare

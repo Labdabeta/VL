@@ -44,7 +44,7 @@ package body HTTP_Utils is
             Sub_Length : Natural := Text'First;
             Next_Line : String_List (1 .. 1);
         begin
-            while Sub_Length < Text'Last loop
+            while Sub_Length <= Text'Last loop
                 if Text (Sub_Length) = ASCII.LF then
                     Next_Line (1) := To_Unbounded_String (
                         Text (Text'First .. Sub_Length - 1));
@@ -56,7 +56,7 @@ package body HTTP_Utils is
             end loop;
 
             Next_Line (1) := To_Unbounded_String (
-                Text (Text'First .. Text'Last - 1));
+                Text (Text'First .. Text'Last));
             return Current & Next_Line;
         end Line_Split;
 

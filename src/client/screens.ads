@@ -7,8 +7,8 @@ package Screens is
         QUIT,  --  DONE
         NONE,  --  DONE
         MAIN_MENU,  -- DONE
-        LOBBY, -- NEXT! XXX
-        WAITING,
+        LOBBY, -- DONE
+        WAITING,   -- DONE??
         HOSTING,   -- DONE
         PICKING,   -- DONE
         ALONE, -- STUBBED FOR NOW!
