@@ -77,8 +77,9 @@ package body VL is
             Notify_All;
         end Attach_Listener;
 
+        -- This is getting called before created
         entry Attach_Notifier (Notifier : in VL_Notifier_Access)
-            when Created and not Destroyed is
+            when True is
                 New_Notifier_Node : Notifier_Node_Ptr := new Notifier_Node;
         begin
             New_Notifier_Node.Notifier := Notifier;
@@ -123,6 +124,7 @@ package body VL is
             end if;
         end Commit;
 
+        -- This is never called
         entry Create (Target : in Boards.Board)
             when not Created is
             Player_List : Boards.Player_List := Boards.Get_Players (Target);
@@ -218,6 +220,10 @@ package body VL is
             Current_Listener : Listener_Node_Ptr;
             Current_Notifier : Notifier_Node_Ptr;
         begin
+            if State = null then
+                return;
+            end if;
+
             Current_Listener := Listeners;
             while Current_Listener /= null loop
                 Current_Listener.Callback.all (State.all);

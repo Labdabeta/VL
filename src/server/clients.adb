@@ -5,6 +5,8 @@ with Lobby;
 with VL;
 with GNAT.Sockets; use GNAT.Sockets;
 
+with Ada.Text_IO;
+
 package body Clients is
     --  Poll at 10hz
     Poll_Delay : constant Duration := 0.1;
@@ -25,10 +27,13 @@ package body Clients is
                 Name => Non_Blocking_IO,
                 Enabled => True);
         Game_Over : Boolean;
+        Address_Length : Natural;
     begin
+        -- No need to create the game, as it will be loaded by a set
         select
             accept Initialize (The_Lobby : in Lobby.Lobby_Element) do
                 Temp_Lobby := The_Lobby;
+                -- EXECUTED!
             end Initialize;
         or
             accept Kill do
@@ -37,15 +42,30 @@ package body Clients is
         end select;
 
         if not Is_Killed then
+            Address_Length := Temp_Lobby.Address'First;
+            while Address_Length < Temp_Lobby.Address'Last and
+                Temp_Lobby.Address (Address_Length) /= ' '
+            loop
+                Address_Length := Address_Length + 1;
+            end loop;
+            Address_Length := Address_Length - 1;
+
+            Ada.Text_IO.Put_Line ("Host is '" &
+                Temp_Lobby.Address (Temp_Lobby.Address'First .. Address_Length)
+                & "'");
             Server_Address.Addr := Addresses (
-                Get_Host_By_Name (Temp_Lobby.Address), 1);
-            Server_Address.Port := Constants.VL_Port;
+                Get_Host_By_Name (Temp_Lobby.Address (
+                    Temp_Lobby.Address'First .. Address_Length)), 1);
+            Server_Address.Port := Constants.VL_Client_Port;
 
             Create_Socket (Server_Socket);
             Set_Socket_Option (
                 Server_Socket, Socket_Level, (Reuse_Address, True));
 
+            -- Never executed
+            Ada.Text_IO.Put_Line ("Connecting...");
             Connect_Socket (Server_Socket, Server_Address);
+            Ada.Text_IO.Put_Line ("Connected!");
 
             Connection := Stream (Server_Socket);
             Control_Socket (Server_Socket, Non_Blocking_Request);
@@ -55,7 +75,10 @@ package body Clients is
             Set (Server_Set, Server_Socket);
             Create_Selector (Read_Selector);
 
+            -- Never executed
+            Ada.Text_IO.Put_Line ("Reading team...");
             Natural'Read (Connection, Team);
+            Ada.Text_IO.Put_Line ("Read team as " & Natural'Image (Team));
             Game_Over := False;
             while not Game_Over loop
                 select
@@ -73,10 +96,13 @@ package body Clients is
                         Game_Over := True;
                     end Kill;
                 else
+                    -- This is never executed
+                    Ada.Text_IO.Put_Line ("Checking...");
                     Check_Selector (Read_Selector,
                         Server_Set, Empty_Set,
                         Read_Status, Poll_Delay);
                     if Read_Status = Completed then
+                        Ada.Text_IO.Put_Line ("Read!");
                         declare
                             New_Board : Boards.Board :=
                                 Boards.Board'Input (Connection);

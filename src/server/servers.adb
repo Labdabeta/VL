@@ -134,7 +134,7 @@ package body Servers is
             Natural'Write (Connection, Team);
             Game.Attach_Notifier (Notifier'Unchecked_Access);
             while not Game_Over loop
-                --  Will wait until change
+                --  Will wait until change. The change is cleared by the UI
                 Notifier.Get_Dimensions (
                     Width, Height, Num_Players, Num_Actions);
                 declare
@@ -173,6 +173,7 @@ package body Servers is
         select
             accept Initialize (The_Lobby : in Lobby.Lobby_Element) do
                 Temp_Lobby := The_Lobby;
+                Game.Create (Lobby.Read_Board (The_Lobby));
             end Initialize;
         or
             accept Kill do
@@ -184,7 +185,7 @@ package body Servers is
             Game.Join (Team);
             Lobby_Id := Lobby.Post_Lobby (Temp_Lobby);
             Local_Address.Addr := Addresses (Get_Host_By_Name (Host_Name), 1);
-            Local_Address.Port := Constants.VL_Port;
+            Local_Address.Port := Constants.VL_Host_Port;
 
             Create_Socket (Server_Socket);
             Set_Socket_Option (Server_Socket, Socket_Level,

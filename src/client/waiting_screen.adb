@@ -5,7 +5,7 @@ with Screens;
 with Paths;
 with SDL;
 with Strings;
-with VL;
+with VL; use VL;
 with Games;
 
 with Ada.Unchecked_Deallocation;
@@ -14,7 +14,7 @@ with Ada.Text_IO;
 
 package body Waiting_Screen is
     Back : Buttons.Button;
-    Map : Boards.Board_Ptr;
+    State : VL.VL_State_Access;
     Title : SDL.Image;
     Title_Area, Map_Area : SDL.Rectangle;
 
@@ -32,8 +32,8 @@ package body Waiting_Screen is
         end if;
         Update_Layout;
         Buttons.Draw (Back);
-        if Map /= null then
-            Games.Draw_Board (Map.all, Map_Area);
+        if State /= null then
+            Games.Draw_Board (State.Board, Map_Area);
         end if;
         if not SDL.Is_Null (Title) then
             SDL.Draw_Image_Centered (Title, Title_Area);
@@ -47,15 +47,15 @@ package body Waiting_Screen is
         if not SDL.Is_Null (Title) then
             SDL.Free_Image (Title);
         end if;
-        if Map /= null then
-            Boards.Free_Board (Map);
+        if State /= null then
+            VL.Free_State (State);
         end if;
     end Finalize;
 
     procedure Initialize is begin
         Back := Buttons.Create (
             SDL.Render_Text (Fonts.Main_Font, Strings.Back, True));
-        Map := null;
+        State := null;
         Title := SDL.Null_Image;
         Title_Area := (0, 0, 1, 1);
         Map_Area := (0, 0, 1, 1);
@@ -73,8 +73,17 @@ package body Waiting_Screen is
     end Process_Event;
 
     procedure Refresh is
+        Width, Height, Num_Players : Positive;
+        Num_Actions : Natural;
     begin
-        Ada.Text_IO.Put_Line ("Refresh");
+        if State /= null then
+            Free_State (State);
+        end if;
+
+        Notifier.Get_Dimensions (Width, Height, Num_Players, Num_Actions);
+        State := new VL_State (Width, Height, Num_Players, Num_Actions);
+        Notifier.Get_State (State.all);
+
         Notifier.Clear;
     end Refresh;
 
