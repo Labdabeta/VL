@@ -3,7 +3,7 @@ with "sdl.gpr";
 with "sdl_image.gpr";
 with "sdl_ttf.gpr";
 project Client is
-    for Source_Dirs use ("model", "ui/**", "client", "server", "res");
+    for Source_Dirs use ("model", "ui/**", "client", "server", "net", "res");
     for Object_Dir use "../build";
     for Exec_Dir use "../bin";
     for Main use ("main.adb");

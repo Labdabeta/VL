@@ -5,6 +5,7 @@ with Test_Board;
 with Test_Coordinate;
 with Test_Tile;
 with Test_Action;
+with Test_Net;
 
 procedure Main is
     Separator : String (1 .. 80) := (others => '~');
@@ -13,7 +14,8 @@ procedure Main is
         1 => Test_Board.Suite'Access,
         2 => Test_Coordinate.Suite'Access,
         3 => Test_Tile.Suite'Access,
-        4 => Test_Action.Suite'Access);
+        4 => Test_Action.Suite'Access,
+        5 => Test_Net.Suite'Access);
 
     Success : Boolean := True;
 
@@ -23,6 +25,7 @@ procedure Main is
             when 2 => return "Coordinate";
             when 3 => return "Tile";
             when 4 => return "Action";
+            when 5 => return "Net";
             when others => return "ERROR!!!";
         end case;
     end Suite_Names;
